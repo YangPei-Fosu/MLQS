@@ -8,14 +8,17 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+
 import java.sql.Timestamp;
 
-@Data
+
 @TableName("qwen_memory")
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
 /**
- * 会话记忆类
+ * 记忆实体类
+ * 这个类用于持久化会话记忆到Mysql
  */
 public class MemoryEntity {
     @TableId(value = "session_id", type = IdType.ASSIGN_ID)

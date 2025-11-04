@@ -10,8 +10,12 @@ import org.springframework.data.redis.core.RedisTemplate;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+/**
+ * redis缓存记忆实现记忆的快速查找
+ * 缓存的key为sessionId
+ * 缓存的value为Memory类
+ */
 public class MemoryCache {
-    //<sessionId, 记忆类>
     private RedisTemplate<String, ChatMemory> rt;
 
     public void set(String key, ChatMemory value) {

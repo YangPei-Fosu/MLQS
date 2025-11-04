@@ -3,7 +3,6 @@ package io.mlqs.memory;
 import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.data.message.ChatMessageDeserializer;
 import dev.langchain4j.memory.ChatMemory;
-import dev.langchain4j.memory.chat.MessageWindowChatMemory;
 import io.mlqs.memory.db.MemoryCache;
 import io.mlqs.memory.db.MemoryEntity;
 import io.mlqs.memory.db.MemoryMapper;
@@ -11,7 +10,6 @@ import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -75,6 +73,12 @@ public class MemoryServiceImpl implements MemoryService{
             memoryEntity.setDeleteFlag(true);
             memoryMapper.updateById(memoryEntity);
         }
+    }
+
+    //删除缓存
+    @Override
+    public void deleteMemoryCache(String sessionId) {
+        memoryCache.remove(sessionId);
     }
 
 }
