@@ -1,0 +1,29 @@
+spring:
+  elasticsearch:
+    uris: http://localhost:9200
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/fsgs?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    password: Yp200458
+    username: root
+    initial-size: 5
+    max-active: 15
+    max-wait: 60000
+
+  # mysql???
+  druid:
+    initial-size: 5
+    max-active: 15
+    max-wait: 60000
+    min-idle: 5
+
+langchain4j:
+  community:
+    dashscope:
+      chat-model:
+        model-name: qwen-max
+        api-key: sk-ae5952db2cab473d863d43a59b41a493
+        type: in-memory
+        max-messages: 20
+        max-tokens: 1024
