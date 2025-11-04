@@ -81,6 +81,9 @@ public class AgentServiceImpl implements AgentService{
         agentAccessTimes.remove(sessionId);
     }
 
+    /**
+     * 计划任务相关
+     */
     @PostConstruct
     public void init() {
         //初始化清理任务，每5分钟执行一次
