@@ -8,11 +8,13 @@ import io.mlqs.memory.db.MemoryEntity;
 import io.mlqs.memory.db.MemoryMapper;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.util.List;
 
 @Data
+@Service
 public class MemoryServiceImpl implements MemoryService{
     //Mysql记忆存储Dao
     @Autowired

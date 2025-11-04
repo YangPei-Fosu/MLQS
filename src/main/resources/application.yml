@@ -27,3 +27,6 @@ langchain4j:
         type: in-memory
         max-messages: 20
         max-tokens: 1024
+
+agent:
+  timeout: 300
