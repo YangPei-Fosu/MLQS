@@ -2,6 +2,7 @@ package io.mlqs.agent;
 
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.service.AiServices;
+import io.mlqs.es.AiToolService;
 import io.mlqs.memory.MemoryProvider;
 import io.mlqs.memory.MemoryService;
 import jakarta.annotation.PostConstruct;
@@ -16,7 +17,6 @@ import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 @Data
 @Service
@@ -49,6 +49,10 @@ public class AgentServiceImpl implements AgentService{
     @Value("${agent.timeout}")
     private Long timeout;
 
+    //Ai代理使用的工具接口
+    @Autowired
+    private AiToolService aiToolService;
+
     @Override
     public Agent get(String sessionId) {
         //在代理集合中查找代理对象，如果没有就创建一个代理
@@ -60,9 +64,9 @@ public class AgentServiceImpl implements AgentService{
                     //记忆管理
                     .chatMemoryProvider(memoryProvider)
                     //prompt
-                    .systemMessageProvider(mem -> "")
+                    .systemMessageProvider(mem -> Prompt.CHAT_PROMPT)
                     //工具
-                    .tools()
+                    .tools(aiToolService)
                     .build();
             return build;
             }

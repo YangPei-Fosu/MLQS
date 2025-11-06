@@ -22,6 +22,15 @@ public class MemoryServiceImpl implements MemoryService{
     //Redis缓存
     private MemoryCache memoryCache;
 
+    //创建记忆，返回sessionId
+    @Override
+    public String createMemory() {
+        //生成sessionId
+        String sessionId = java.util.UUID.randomUUID().toString();
+        memoryCache.set(sessionId, new Memory(sessionId, 20));
+        return sessionId;
+    }
+
     //获取记忆
     @Override
     public ChatMemory getMemory(String sessionId) {

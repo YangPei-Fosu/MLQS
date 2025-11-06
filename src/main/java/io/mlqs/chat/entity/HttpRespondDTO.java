@@ -15,7 +15,7 @@ import java.util.Map;
  */
 public class HttpRespondDTO {
     private int code;
-    private Map<String, String> content;
+    private Map<String, Object> content;
 
     public static HttpRespondDTO ok(){
         return new HttpRespondDTO(200, new HashMap<>());
@@ -29,7 +29,7 @@ public class HttpRespondDTO {
         return new HttpRespondDTO(code, new HashMap<>());
     }
 
-    public HttpRespondDTO put(String key, String value){
+    public HttpRespondDTO put(String key, Object value){
         this.content.put(key, value);
         return this;
     }

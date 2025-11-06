@@ -1,4 +1,4 @@
-package io.mlqs.es;
+package io.mlqs.utils;
 
 public class BGEUtils {
 
