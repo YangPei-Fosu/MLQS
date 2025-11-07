@@ -7,8 +7,10 @@ import dev.langchain4j.memory.ChatMemory;
 import io.mlqs.memory.db.MemoryCache;
 import io.mlqs.memory.db.MemoryEntity;
 import io.mlqs.memory.db.MemoryMapper;
+import io.mlqs.utils.LogUtils;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
@@ -107,5 +109,4 @@ public class MemoryServiceImpl implements MemoryService{
     public void deleteMemoryCache(String sessionId) {
         memoryCache.remove(sessionId);
     }
-
 }
