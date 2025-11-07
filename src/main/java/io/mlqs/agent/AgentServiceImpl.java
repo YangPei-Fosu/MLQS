@@ -5,24 +5,24 @@ import dev.langchain4j.service.AiServices;
 import io.mlqs.es.AiToolService;
 import io.mlqs.memory.MemoryProvider;
 import io.mlqs.memory.MemoryService;
+import io.mlqs.memory.db.MemoryCache;
+import io.mlqs.utils.LogUtils;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.util.Map;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-
+import java.util.concurrent.ConcurrentHashMap;
 @Data
 @Service
 public class AgentServiceImpl implements AgentService{
     //代理集合，key为sessionId，value为代理对象
-    private Map<String, Agent> agentMap;
+    private Map<String, Agent> agentMap = new ConcurrentHashMap<>();
 
     //对话记忆处理接口
     @Autowired
@@ -32,15 +32,10 @@ public class AgentServiceImpl implements AgentService{
      * 代理存活时间，如果超过指定时间认为代理已失效，则保存记忆并删除代理与相关的记忆缓存
      * key为sessionId，value为时间戳，单位秒
      */
-    private Map<String, Timestamp> agentAccessTimes;
-
-    /**
-     * 清理代理与记忆缓存的定时任务执行器
-     * 每5分钟执行一次
-     */
-    private ScheduledExecutorService cleanupScheduler;
+    private Map<String, Timestamp> agentAccessTimes = new ConcurrentHashMap<>();
 
     //使用的语言模型
+    @Autowired
     private ChatLanguageModel model;
     //记忆提供接口
     @Autowired
@@ -85,21 +80,8 @@ public class AgentServiceImpl implements AgentService{
         agentAccessTimes.remove(sessionId);
     }
 
-    /**
-     * 计划任务相关
-     */
-    @PostConstruct
-    public void init() {
-        //初始化清理任务，每5分钟执行一次
-        cleanupScheduler = Executors.newSingleThreadScheduledExecutor();
-        cleanupScheduler.scheduleAtFixedRate(this::clearUpAgent, 5, 5, TimeUnit.MINUTES);
-    }
-    @PreDestroy
-    public void destroy() {
-        if (cleanupScheduler != null)
-            cleanupScheduler.shutdown();
-    }
-
+    //每10秒检查代理存活时间，超过指定时间则删除代理对象
+    @Scheduled(fixedDelay = 10000)
     private void clearUpAgent(){
         //当前时间
         long currentTime = System.currentTimeMillis() / 1000;
@@ -108,6 +90,7 @@ public class AgentServiceImpl implements AgentService{
             String sessionId = entry.getKey();
             //获取代理的上次访问时间，单位是秒
             Long accessTime = entry.getValue().getTime() / 1000;
+            System.out.println("accessTime:"+ accessTime + " currentTime:"+ currentTime);
             //判断是否超时
             if (currentTime - accessTime > timeout) {
                 // 超时则清理相关资源
@@ -116,6 +99,11 @@ public class AgentServiceImpl implements AgentService{
             }
             return false;
         });
+    }
+
+    @Scheduled(cron = "${log.report-cron}")
+    public void schedule() {
+        LogUtils.report(MemoryCache.class, "AgentMap" ,"存活的代理数："+ agentMap.size());
     }
 
 }

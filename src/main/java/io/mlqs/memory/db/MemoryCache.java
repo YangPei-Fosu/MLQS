@@ -1,11 +1,21 @@
 package io.mlqs.memory.db;
 
-import dev.langchain4j.memory.ChatMemory;
+import dev.langchain4j.data.message.ChatMessage;
+import dev.langchain4j.data.message.ChatMessageDeserializer;
+import io.mlqs.utils.LogUtils;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+@Component
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -15,17 +25,31 @@ import org.springframework.data.redis.core.RedisTemplate;
  * 缓存的value为Memory类
  */
 public class MemoryCache {
-    private RedisTemplate<String, ChatMemory> rt;
+    @Autowired
+    private RedisTemplate<String, Object> rt;
 
-    public void set(String key, ChatMemory value) {
-        rt.opsForValue().set(key, value);
+    public void set(String key, String value) {
+        //缓存的过期时间为300秒
+        rt.opsForValue().set(key, value ,300, TimeUnit.SECONDS);
     }
 
-    public ChatMemory get(String key) {
-        return rt.opsForValue().get(key);
+    public List<ChatMessage> get(String key) {
+        String json = (String) rt.opsForValue().get(key);
+        if (json != null) {
+            //刷新过期时间
+            rt.expire(key, 300, TimeUnit.SECONDS);
+            return ChatMessageDeserializer.messagesFromJson(json);
+        }
+        return new ArrayList<>();
     }
 
     public void remove(String key) {
         rt.delete(key);
+    }
+
+    //设置定时任务输出缓存条目，每分钟执行
+    @Scheduled(cron = "${log.report-cron}")
+    public void schedule() {
+        LogUtils.report(MemoryCache.class, "Redis" ,"缓存条目数：" + rt.keys("*").size());
     }
 }

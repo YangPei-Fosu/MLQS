@@ -1,6 +1,5 @@
 package io.mlqs.chat;
 
-import io.mlqs.agent.Agent;
 import io.mlqs.agent.AgentService;
 import io.mlqs.memory.MemoryService;
 import org.springframework.beans.factory.annotation.Autowired;

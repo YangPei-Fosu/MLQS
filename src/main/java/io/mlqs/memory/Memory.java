@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
@@ -20,17 +21,22 @@ import java.util.List;
  * Memory类为会话记忆类，里面的添加、清空等是提供给AI自己处理的
  * MemoryEntity类则是把聊天记录转换到数据库里存储的实体
  */
+@Component
 @Data
 @NoArgsConstructor
 public class Memory implements ChatMemory {
-    @Autowired
     private MemoryService memoryService;
     private String sessionId;
     private ChatMemory delegate;
 
-    public Memory(String sessionId,
-                  int maxMessages
-    ) {
+    //构造函数注入
+    public Memory(MemoryService memoryService, String sessionId, int maxMessages) {
+        this.memoryService = memoryService;
+        this.sessionId = sessionId;
+        this.delegate = MessageWindowChatMemory.builder().maxMessages(maxMessages).build();
+    }
+
+    public Memory(String sessionId,int maxMessages) {
         this.sessionId = sessionId;
         this.delegate = MessageWindowChatMemory.builder().maxMessages(maxMessages).build();
     }

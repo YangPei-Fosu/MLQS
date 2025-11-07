@@ -10,7 +10,6 @@ public class MemoryProviderImpl implements MemoryProvider{
     private MemoryService memoryService;
     @Override
     public ChatMemory get(Object o) {
-        String sessionId = o.toString();
-        return memoryService.getMemory(sessionId);
+        return memoryService.getMemory((String) o);
     }
 }

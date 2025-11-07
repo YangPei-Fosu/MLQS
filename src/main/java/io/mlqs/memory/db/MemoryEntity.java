@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 import java.sql.Timestamp;
 
 
-@TableName("qwen_memory")
+@TableName("bas_memory")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
