@@ -90,7 +90,6 @@ public class AgentServiceImpl implements AgentService{
             String sessionId = entry.getKey();
             //获取代理的上次访问时间，单位是秒
             Long accessTime = entry.getValue().getTime() / 1000;
-            System.out.println("accessTime:"+ accessTime + " currentTime:"+ currentTime);
             //判断是否超时
             if (currentTime - accessTime > timeout) {
                 // 超时则清理相关资源
