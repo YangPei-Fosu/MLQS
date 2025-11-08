@@ -1,12 +1,12 @@
 spring:
   elasticsearch:
     uris: http://localhost:9200
-    enabled: true
+#    enabled: true
 
   datasource:
-    url: jdbc:mysql://localhost:3306/fsgs?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
+    url: jdbc:mysql://localhost:3306/yangpei?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
     driver-class-name: com.mysql.cj.jdbc.Driver
-    password: Yp200458
+    password: root
     username: root
     initial-size: 5
     max-active: 15
@@ -22,7 +22,6 @@ spring:
     redis:
       host: localhost
       port: 6379
-      password:
       database: 0
 
 langchain4j:

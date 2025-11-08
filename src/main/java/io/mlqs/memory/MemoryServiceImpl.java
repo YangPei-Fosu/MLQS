@@ -109,4 +109,10 @@ public class MemoryServiceImpl implements MemoryService{
     public void deleteMemoryCache(String sessionId) {
         memoryCache.remove(sessionId);
     }
+
+    @Override
+    public List<MemoryEntity> getAllValid() {
+        return memoryMapper.selectAllValid();
+    }
+
 }

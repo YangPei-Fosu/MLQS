@@ -1,7 +1,9 @@
 package io.mlqs.memory;
 
 import dev.langchain4j.memory.ChatMemory;
+import io.mlqs.memory.db.MemoryEntity;
 
+import java.util.List;
 
 /**
  * 主要的记忆接口
@@ -19,4 +21,5 @@ public interface MemoryService {
     void clearMemory(String sessionId);
     void deleteMemory(String sessionId);
     void deleteMemoryCache(String sessionId);
+    List<MemoryEntity> getAllValid();
 }
