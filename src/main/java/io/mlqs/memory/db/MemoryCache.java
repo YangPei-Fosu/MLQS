@@ -45,7 +45,7 @@ public class MemoryCache {
             rt.expire(key, timeout + 30, TimeUnit.SECONDS);
             return ChatMessageDeserializer.messagesFromJson(json);
         }
-        return new ArrayList<>();
+        return null;
     }
 
     public void remove(String key) {
