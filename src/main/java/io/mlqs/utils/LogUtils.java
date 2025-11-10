@@ -57,14 +57,19 @@ public class LogUtils {
         }
 
         public void start(){
-            System.out.print(new Timestamp(System.currentTimeMillis()) + GREEN + " PROGRESS " + RESET + " [" + c.getName() + "] " + m + " [" + f + "/" + t + "]");
+            if(f == t)
+                System.out.println(new Timestamp(System.currentTimeMillis()) + GREEN + " PROGRESS " + RESET + " [" + c.getName() + "] " + m + " [" + f + "/" + t + "]");
+            else
+                System.out.print(new Timestamp(System.currentTimeMillis()) + GREEN + " PROGRESS " + RESET + " [" + c.getName() + "] " + m + " [" + f + "/" + t + "]");
         }
         public void update(int i){
             f++;
             //覆盖上一条输出
-            System.out.print("\u001B[2K\r");
-            System.out.print(new Timestamp(System.currentTimeMillis()) + GREEN + " PROGRESS " + RESET + " [" + c.getName() + "] " + m + " [" + f + "/" + t + "]");
-            if(f == t)
+            if(f < t){
+                System.out.print("\u001B[2K\r");
+                System.out.print(new Timestamp(System.currentTimeMillis()) + GREEN + " PROGRESS " + RESET + " [" + c.getName() + "] " + m + " [" + f + "/" + t + "]");
+            }
+            if(f >= t)
                 System.out.println();
         }
     }
