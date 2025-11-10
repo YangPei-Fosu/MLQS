@@ -1,5 +1,7 @@
 package io.mlqs.utils;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -37,5 +39,36 @@ public class LogUtils {
     public static void report(Class<?> clazz, String reporter, String message) {
         if(report)
             System.out.println(new Timestamp(System.currentTimeMillis()) + BLUE + " "+ reporter +" " + RESET + " [" + clazz.getName() + "] " + message);
+    }
+
+    //进度条
+    @Data
+    public static class Bar{
+        private static int f;
+        private static int t;
+        private static Class<?> c;
+        private static String m;
+
+        public Bar(int form, int to, Class<?> clazz, String message) {
+            this.f = form;
+            this.t = to;
+            this.c = clazz;
+            this.m = message;
+        }
+
+        public void start(){
+            System.out.print(new Timestamp(System.currentTimeMillis()) + GREEN + " PROGRESS " + RESET + " [" + c.getName() + "] " + m + " [" + f + "/" + t + "]");
+        }
+        public void update(int i){
+            f++;
+            //覆盖上一条输出
+            System.out.print("\u001B[2K\r");
+            System.out.print(new Timestamp(System.currentTimeMillis()) + GREEN + " PROGRESS " + RESET + " [" + c.getName() + "] " + m + " [" + f + "/" + t + "]");
+            if(f == t)
+                System.out.println();
+        }
+    }
+    public static Bar progress(Class<?> clazz, String message , int form, int to) {
+        return new Bar(form, to ,clazz ,message);
     }
 }

@@ -1,6 +1,6 @@
 package io.mlqs.es;
 
-import io.mlqs.es.db.DocumentEntity;
+import io.mlqs.es.entity.DocumentSearchResultEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,7 +13,7 @@ public class AiToolServiceImpl implements AiToolService{
     private DocumentService documentService;
 
     @Override
-    public List<DocumentEntity> search(String context) {
+    public List<DocumentSearchResultEntity> search(String context) {
         //test
         return new ArrayList<>();
 //        return documentService.hybridSearch(context);

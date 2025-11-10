@@ -21,5 +21,4 @@ public interface MemoryService {
     void clearMemory(String sessionId);
     void deleteMemory(String sessionId);
     void deleteMemoryCache(String sessionId);
-    List<MemoryEntity> getAllValid();
 }

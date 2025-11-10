@@ -12,7 +12,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -48,8 +47,17 @@ public class MemoryCache {
         return null;
     }
 
+    public int size() {
+        return rt.keys("*").size();
+    }
+
     public void remove(String key) {
         rt.delete(key);
+    }
+
+    //获取迭代器
+    public Iterable<String> Iterator() {
+        return rt.keys("*");
     }
 
     //设置定时任务输出缓存条目，每分钟执行

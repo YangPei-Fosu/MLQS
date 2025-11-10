@@ -8,8 +8,10 @@ import io.mlqs.memory.db.MemoryCache;
 import io.mlqs.memory.db.MemoryEntity;
 import io.mlqs.memory.db.MemoryMapper;
 import io.mlqs.utils.LogUtils;
+import jakarta.annotation.PreDestroy;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.SmartLifecycle;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
@@ -17,7 +19,7 @@ import java.util.List;
 
 @Service
 @Data
-public class MemoryServiceImpl implements MemoryService{
+public class MemoryServiceImpl implements MemoryService, SmartLifecycle {
     //Mysql记忆存储Dao
     @Autowired
     private MemoryMapper memoryMapper;
@@ -110,5 +112,49 @@ public class MemoryServiceImpl implements MemoryService{
         memoryCache.remove(sessionId);
     }
 
+    /**
+     * 结束进程时运行
+     * 若进城结束时缓存中存在数据，则保存到Mysql中
+     */
+    private volatile boolean running = true;
 
+    //销毁
+    public void destroy() {
+        try {
+            int size = memoryCache.size();
+            LogUtils.log(MemoryServiceImpl.class, "正在存储全部缓存信息。共" + size + "条数据");
+            LogUtils.Bar progress = LogUtils.progress(MemoryServiceImpl.class, "正在存储全部缓存信息。", 0, size);
+            progress.start();
+            for (String s : memoryCache.Iterator()) {
+                saveMemory(s);
+                deleteMemoryCache(s);
+                progress.update(1);
+            }
+            LogUtils.log(MemoryServiceImpl.class, "存储完成。");
+        }catch (Exception e){
+            LogUtils.log(MemoryServiceImpl.class, "存储失败。");
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void start() {
+        running = true;
+    }
+
+    @Override
+    public void stop() {
+        destroy();
+        running = false;
+    }
+
+    @Override
+    public boolean isRunning() {
+        return running;
+    }
+
+    @Override
+    public int getPhase() {
+        return Integer.MAX_VALUE;
+    }
 }
