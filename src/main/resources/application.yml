@@ -34,11 +34,11 @@ langchain4j:
         max-messages: 20
         max-tokens: 1024
 
-agent:
-  timeout: 300
-
-log:
-  debug: 1
-  report: 1
-  #报告表达式
-  report-cron: 0 0/1 * * * ?
+mlqs:
+  agent:
+    timeout: 300
+  log:
+    debug: 1
+    report: 1
+    #报告表达式
+    report-cron: 0 0/1 * * * ?

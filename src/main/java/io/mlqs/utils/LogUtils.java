@@ -11,7 +11,7 @@ public class LogUtils {
     private static boolean debug = false;
     private static boolean report = false;
     @Autowired
-    public void setDebugFlag(@Value("${log.debug}") boolean debugFlag, @Value("${log.report}") boolean reportFlag) {
+    public void setDebugFlag(@Value("${mlqs.log.debug}") boolean debugFlag, @Value("${mlqs.log.report}") boolean reportFlag) {
         LogUtils.debug = debugFlag;
         LogUtils.report = reportFlag;
     }

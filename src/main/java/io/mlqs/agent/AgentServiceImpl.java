@@ -40,7 +40,7 @@ public class AgentServiceImpl implements AgentService{
     @Autowired
     private MemoryProvider memoryProvider;
     //代理存活时间，在yml中设置
-    @Value("${agent.timeout}")
+    @Value("${mlqs.agent.timeout}")
     private Long timeout;
 
     //Ai代理使用的工具接口
@@ -99,7 +99,7 @@ public class AgentServiceImpl implements AgentService{
         });
     }
 
-    @Scheduled(cron = "${log.report-cron}")
+    @Scheduled(cron = "${mlqs.log.report-cron}")
     public void schedule() {
         LogUtils.report(MemoryCache.class, "AgentMap" ,"存活的代理数："+ agentMap.size());
     }

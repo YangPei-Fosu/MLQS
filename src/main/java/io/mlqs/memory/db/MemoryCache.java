@@ -30,7 +30,7 @@ public class MemoryCache {
     private RedisTemplate<String, Object> rt;
 
     //过期时间，比代理的超时时间长30秒
-    @Value("${agent.timeout}")
+    @Value("${mlqs.agent.timeout}")
     private Long timeout;
 
     public void set(String key, String value) {
@@ -53,7 +53,7 @@ public class MemoryCache {
     }
 
     //设置定时任务输出缓存条目，每分钟执行
-    @Scheduled(cron = "${log.report-cron}")
+    @Scheduled(cron = "${mlqs.log.report-cron}")
     public void schedule() {
         LogUtils.report(MemoryCache.class, "Redis" ,"缓存条目数：" + rt.keys("*").size());
     }
