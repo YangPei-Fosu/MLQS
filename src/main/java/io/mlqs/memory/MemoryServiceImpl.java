@@ -10,6 +10,7 @@ import io.mlqs.memory.db.MemoryMapper;
 import io.mlqs.utils.LogUtils;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
@@ -52,8 +53,7 @@ public class MemoryServiceImpl implements MemoryService{
         }else {
             //缓存中存在则从缓存中获取
             memory = new Memory(this,sessionId, 20);
-            for (ChatMessage chatMessage : chatMessages)
-                memory.add(chatMessage);
+            memory.messages().addAll(chatMessages);
         }
         return memory;
     }
@@ -110,5 +110,9 @@ public class MemoryServiceImpl implements MemoryService{
         memoryCache.remove(sessionId);
     }
 
+    @Override
+    public List<MemoryEntity> getAllValid() {
+        return memoryMapper.selectAllValid();
+    }
 
 }
