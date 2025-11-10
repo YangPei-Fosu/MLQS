@@ -33,6 +33,7 @@ langchain4j:
         type: in-memory
         max-messages: 20
         max-tokens: 1024
+        enable-search: true
 
 mlqs:
   agent:
