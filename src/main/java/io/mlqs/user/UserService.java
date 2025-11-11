@@ -1,5 +1,7 @@
 package io.mlqs.user;
 
+import io.mlqs.user.db.UserEntity;
+
 /**
  * 用户服务接口
  */
