@@ -6,6 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -13,20 +16,30 @@ public class UserServiceImpl implements UserService{
     @Autowired
     private UserMapper userMapper;
 
-
     @Override
     public String login(String account, String password) {
-        return null;
+        Map<String,Object> map = new HashMap<>();
+        map.put("account",account);
+        map.put("password",password);
+        List<UserEntity> userEntityList = userMapper.selectByMap(map);
+        if (userEntityList.isEmpty()){
+            return null;
+        }
+        return userEntityList.get(0).getUserId();
     }
 
     @Override
     public String register(String account, String password) {
+        if (userMapper.selectById(account) != null){
+            return null;
+        }
         String userId = UUID.randomUUID().toString();
         UserEntity userEntity = new UserEntity();
         userEntity.setAccount(account);
         userEntity.setPassword(password);
         userEntity.setCreateTime(new Timestamp(System.currentTimeMillis()));
         userEntity.setUserId(userId);
+        userMapper.insert(userEntity);
         return userId;
     }
 

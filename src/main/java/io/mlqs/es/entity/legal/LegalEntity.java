@@ -14,11 +14,13 @@ import java.util.List;
 public class LegalEntity {
     private String lawName;
     private List<LegalRegulationsEntity> records;
+    private String info;
 
     @Override
     public String toString() {
         return "LegalEntity{" +
                 "lawName='" + lawName + '\'' +
+                ", info='" + info + '\'' +
                 ", records=" + records +
                 '}';
     }

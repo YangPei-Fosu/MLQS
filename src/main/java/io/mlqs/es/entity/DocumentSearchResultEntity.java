@@ -37,4 +37,12 @@ public class DocumentSearchResultEntity {
         this.docNames.add(key);
         return this;
     }
+
+    @Override
+    public String toString(){
+        return "DocumentSearchResultEntity{" +
+                "content=" + content +
+                ", docNames=" + docNames +
+                '}';
+    }
 }
