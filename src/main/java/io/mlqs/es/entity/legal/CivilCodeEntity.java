@@ -15,6 +15,12 @@ import java.util.List;
 @AllArgsConstructor
 public class CivilCodeEntity extends LegalEntity {
     private final String lawName = "中华人民共和国民法典";
+
+    /**
+     * 基本信息
+     */
+    public final String info = "2020年5月28日第十三届全国人民代表大会第三次会议通过";
+
     /**
      * 法条列表
      */
@@ -24,6 +30,7 @@ public class CivilCodeEntity extends LegalEntity {
     public String toString() {
         return "CivilCodeEntity{" +
                 "lawName='" + lawName + '\'' +
+                ", info='" + info + '\'' +
                 ", records=" + records +
                 '}';
     }
