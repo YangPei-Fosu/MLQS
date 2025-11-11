@@ -1,6 +1,5 @@
 package io.mlqs.es.db;
 
-import com.baomidou.mybatisplus.annotation.TableField;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
@@ -22,10 +21,22 @@ public class CivilCodeRecordEntity extends LegalRegulationsEntity{
     private String code;
 
     /**
+     * 编名
+     */
+    @Field(type = FieldType.Keyword)
+    private String codeName;
+
+    /**
      *章节：第XX章
      */
     @Field(type = FieldType.Keyword)
     private String chapter;
+
+    /**
+     * 章节名
+     */
+    @Field(type = FieldType.Keyword)
+    private String chapterName;
 
     /**
      * 节号：第XX节
@@ -34,10 +45,10 @@ public class CivilCodeRecordEntity extends LegalRegulationsEntity{
     private String section;
 
     /**
-     * 标题
+     * 节名
      */
     @Field(type = FieldType.Text, analyzer = "ik_max_word", searchAnalyzer = "ik_max_word")
-    private String title;
+    private String sectionName;
 
     /**
      * 条号：第XX条
@@ -61,6 +72,15 @@ public class CivilCodeRecordEntity extends LegalRegulationsEntity{
     //以json输出
     @Override
     public String toString(){
-        return "{\"code\":\"" + code + "\",\"chapter\":\"" + chapter + "\",\"section\":\"" + section + "\",\"title\":\"" + title + "\",\"item\":\"" + item + "\",\"content\":\"" + content + "\"}";
-    }
+        return "CivilCodeRecordEntity{" +
+                "code='" + code + '\'' +
+                ", codeName='" + codeName + '\'' +
+                ", chapter='" + chapter + '\'' +
+                ", chapterName='" + chapterName + '\'' +
+                ", section='" + section + '\'' +
+                ", sectionName='" + sectionName + '\'' +
+                ", item='" + item + '\'' +
+                ", content='" + content + '\'' +
+                '}';
+        }
 }
