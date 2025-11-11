@@ -3,19 +3,17 @@ package io.mlqs;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import io.mlqs.es.db.CivilCodeRecordEntity;
-import io.mlqs.es.db.CivilCodeRecordEntityRepository;
+import io.mlqs.es.db.repository.CivilCodeRecordRepository;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class CivilTest {
     @Autowired
-    private CivilCodeRecordEntityRepository documentRepository;
+    private CivilCodeRecordRepository documentRepository;
     @Test
     public void insert() {
         //读入文件

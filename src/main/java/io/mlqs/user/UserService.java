@@ -9,7 +9,7 @@ public interface UserService {
     String login(String account, String password);
 
     /**
-     * 注册用户方法，返回UserId
+     * 注册用户方法，返回UserId,如果注册成功则返回UserId，否则返回null
      * @param account
      * @param password
      * @return UserId
