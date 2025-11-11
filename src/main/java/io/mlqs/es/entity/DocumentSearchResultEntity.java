@@ -1,5 +1,6 @@
 package io.mlqs.es.entity;
 
+import com.google.gson.Gson;
 import io.mlqs.es.entity.legal.LegalEntity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -40,9 +41,7 @@ public class DocumentSearchResultEntity {
 
     @Override
     public String toString(){
-        return "DocumentSearchResultEntity{" +
-                "content=" + content +
-                ", docNames=" + docNames +
-                '}';
+        Gson gson = new Gson();
+        return gson.toJson(this);
     }
 }

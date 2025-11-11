@@ -2,6 +2,7 @@ package io.mlqs.es.entity.legal;
 
 import io.mlqs.es.db.LegalRegulationsEntity;
 import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
@@ -11,17 +12,18 @@ import java.util.List;
  */
 @NoArgsConstructor
 @AllArgsConstructor
-public class LegalEntity {
+@Data
+public class LegalEntity<T extends LegalRegulationsEntity> {
+    /**
+     * 文献名
+     */
     private String lawName;
-    private List<LegalRegulationsEntity> records;
+    /**
+     * 法条列表
+     */
+    private List<T> records;
+    /**
+     * 基本信息
+     */
     private String info;
-
-    @Override
-    public String toString() {
-        return "LegalEntity{" +
-                "lawName='" + lawName + '\'' +
-                ", info='" + info + '\'' +
-                ", records=" + records +
-                '}';
-    }
 }

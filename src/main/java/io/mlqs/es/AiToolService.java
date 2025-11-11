@@ -7,5 +7,5 @@ import java.util.List;
 
 public interface AiToolService {
     @Tool("搜索工具")
-    List<DocumentSearchResultEntity> search(String context);
+    DocumentSearchResultEntity search(String context, List<String> legalName);
 }
