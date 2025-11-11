@@ -20,8 +20,9 @@ public class ChatServiceImpl implements ChatService{
     @Autowired
     private MemoryService memoryService;
 
+
     @Autowired
-    private UserRecordService userRecordService;
+    private UserRecordService chatUserRecordService;
 
     /**
      * 交互接口，如果传入的sessionId为空，则相当于创建新的会话
@@ -44,7 +45,7 @@ public class ChatServiceImpl implements ChatService{
         if(isNew) {
             memoryService.saveMemory(sessionId);
             //添加用户会话记录
-            userRecordService.addSession(userId, sessionId);
+            chatUserRecordService.addSession(userId, sessionId);
         }
         return result;
     }
@@ -55,7 +56,7 @@ public class ChatServiceImpl implements ChatService{
         //删除代理
         agentService.remove(sessionId);
         memoryService.deleteMemory(sessionId);
-        userRecordService.deleteSession(userId, sessionId);
+        chatUserRecordService.deleteSession(userId, sessionId);
     }
 
     @Override
@@ -65,6 +66,6 @@ public class ChatServiceImpl implements ChatService{
 
     @Override
     public List<String> getSessions(String userId) {
-        return userRecordService.getSessions(userId);
+        return chatUserRecordService.getSessions(userId);
     }
 }

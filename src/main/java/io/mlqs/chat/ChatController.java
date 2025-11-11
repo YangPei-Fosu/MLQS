@@ -32,14 +32,14 @@ public class ChatController {
         return HttpRespondDTO.ok();
     }
 
-    @GetMapping("/chat/getMessages")
+    @PostMapping("/chat/getMessages")
     public HttpRespondDTO getMessages(@RequestBody Map<String,String> request) {
         String sessionId = request.get("session_id");
         String chat = ChatMessageSerializer.messagesToJson(chatService.getMessages(sessionId));
         return HttpRespondDTO.ok().put("messages", chat);
     }
 
-    @GetMapping("/chat/getSessions")
+    @PostMapping("/chat/getSessions")
     public HttpRespondDTO getSessions(@RequestBody Map<String,String> request) {
         String uid = request.get("user_id");
         List<String> sessions = chatService.getSessions(uid);

@@ -27,7 +27,6 @@ public class UserServiceImpl implements UserService{
         userEntity.setPassword(password);
         userEntity.setCreateTime(new Timestamp(System.currentTimeMillis()));
         userEntity.setUserId(userId);
-        userMapper.insert(userEntity);
         return userId;
     }
 
