@@ -18,7 +18,7 @@ public class UserController {
         String uid = userService.login(request.get("account"), request.get("password"));
         return HttpRespondDTO.ok().put("uid", uid);
     }
-
+//
     @PostMapping("/register")
     public HttpRespondDTO register(@RequestBody Map<String,String> request) {
         String uid = userService.register(request.get("account"), request.get("password"));
