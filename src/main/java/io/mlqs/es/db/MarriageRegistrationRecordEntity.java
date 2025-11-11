@@ -40,9 +40,4 @@ public class MarriageRegistrationRecordEntity extends LegalRegulationsEntity{
      */
     @Field(type = FieldType.Dense_Vector, dims = 1024)
     private float[] vector;
-
-    @Override
-    public String toString(){
-        return "{\"chapter\":\"" + chapter + "\",\"chapterName\":\"" + chapterName + "\",\"item\":\"" + item + "\",\"content\":\"" + content + "\"}" ;
-    }
 }
