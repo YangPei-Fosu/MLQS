@@ -68,19 +68,4 @@ public class CivilCodeRecordEntity extends LegalRegulationsEntity{
      */
     @Field(type = FieldType.Dense_Vector, dims = 1024)
     private float[] vector;
-
-    //以json输出
-    @Override
-    public String toString(){
-        return "CivilCodeRecordEntity{" +
-                "code='" + code + '\'' +
-                ", codeName='" + codeName + '\'' +
-                ", chapter='" + chapter + '\'' +
-                ", chapterName='" + chapterName + '\'' +
-                ", section='" + section + '\'' +
-                ", sectionName='" + sectionName + '\'' +
-                ", item='" + item + '\'' +
-                ", content='" + content + '\'' +
-                '}';
-        }
 }
