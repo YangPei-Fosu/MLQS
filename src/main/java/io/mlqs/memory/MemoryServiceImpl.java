@@ -8,7 +8,6 @@ import io.mlqs.memory.db.MemoryCache;
 import io.mlqs.memory.db.MemoryEntity;
 import io.mlqs.memory.db.MemoryMapper;
 import io.mlqs.utils.LogUtils;
-import jakarta.annotation.PreDestroy;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.SmartLifecycle;
@@ -62,7 +61,7 @@ public class MemoryServiceImpl implements MemoryService, SmartLifecycle {
 
     //更新记忆
     @Override
-    public void updateMemory(String sessionId, ChatMemory chatMemory) {
+    public void updateCache(String sessionId, ChatMemory chatMemory) {
         memoryCache.set(sessionId, ChatMessageSerializer.messagesToJson(chatMemory.messages()));
     }
 
@@ -108,7 +107,7 @@ public class MemoryServiceImpl implements MemoryService, SmartLifecycle {
 
     //删除缓存
     @Override
-    public void deleteMemoryCache(String sessionId) {
+    public void deleteCache(String sessionId) {
         memoryCache.remove(sessionId);
     }
 
@@ -127,7 +126,7 @@ public class MemoryServiceImpl implements MemoryService, SmartLifecycle {
             progress.start();
             for (String s : memoryCache.Iterator()) {
                 saveMemory(s);
-                deleteMemoryCache(s);
+                this.deleteCache(s);
                 progress.update(1);
             }
             LogUtils.log(MemoryServiceImpl.class, "存储完成。");

@@ -25,6 +25,4 @@ public class UserEntity {
     private String account;
     @TableField(value = "create_time")
     private Timestamp createTime;
-
-
 }

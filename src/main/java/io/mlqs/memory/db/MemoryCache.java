@@ -28,20 +28,20 @@ public class MemoryCache {
     @Autowired
     private RedisTemplate<String, Object> rt;
 
-    //过期时间，比代理的超时时间长30秒
+    //过期时间，是代理存活时间的2倍
     @Value("${mlqs.agent.timeout}")
     private Long timeout;
 
     public void set(String key, String value) {
         //缓存的过期时间为300秒
-        rt.opsForValue().set(key, value ,timeout + 30, TimeUnit.SECONDS);
+        rt.opsForValue().set(key, value ,timeout * 2, TimeUnit.SECONDS);
     }
 
     public List<ChatMessage> get(String key) {
         String json = (String) rt.opsForValue().get(key);
         if (json != null) {
             //刷新过期时间
-            rt.expire(key, timeout + 30, TimeUnit.SECONDS);
+            rt.expire(key, timeout * 2, TimeUnit.SECONDS);
             return ChatMessageDeserializer.messagesFromJson(json);
         }
         return null;

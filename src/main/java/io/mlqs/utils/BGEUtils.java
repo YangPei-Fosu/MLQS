@@ -1,12 +1,15 @@
 package io.mlqs.utils;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import okhttp3.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import okhttp3.MediaType;
 
 @Component
 public class BGEUtils {
@@ -35,9 +38,8 @@ public class BGEUtils {
 
                 double[] vector = new double[vectorArray.size()];
                 LogUtils.debug(this.getClass(),"开始转换");
-                for (int i = 0; i < vectorArray.size(); i++) {
+                for (int i = 0; i < vectorArray.size(); i++)
                     vector[i] = vectorArray.get(i).getAsDouble();
-                }
                 LogUtils.debug(this.getClass(),"转换成功");
                 return vector;
             }
