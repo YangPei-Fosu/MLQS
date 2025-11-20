@@ -7,13 +7,12 @@ import io.mlqs.memory.MemoryProvider;
 import io.mlqs.memory.MemoryService;
 import io.mlqs.memory.db.MemoryCache;
 import io.mlqs.utils.LogUtils;
-import jakarta.annotation.PostConstruct;
-import jakarta.annotation.PreDestroy;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+
 import java.sql.Timestamp;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -43,6 +42,10 @@ public class AgentServiceImpl implements AgentService{
     @Value("${mlqs.agent.timeout}")
     private Long timeout;
 
+    //prompt
+    @Autowired
+    private Prompt prompt;
+
     //Ai代理使用的工具接口
     @Autowired
     private AiToolService aiToolService;
@@ -58,7 +61,7 @@ public class AgentServiceImpl implements AgentService{
                     //记忆管理
                     .chatMemoryProvider(memoryProvider)
                     //prompt
-                    .systemMessageProvider(mem -> Prompt.CHAT_PROMPT)
+                    .systemMessageProvider(mem -> prompt.getChatPrompt())
                     //工具
                     .tools(aiToolService)
                     .build();

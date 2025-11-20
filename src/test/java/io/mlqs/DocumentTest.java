@@ -2,14 +2,17 @@ package io.mlqs;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import io.mlqs.agent.Prompt;
 import io.mlqs.es.DocumentService;
 import io.mlqs.es.legal.db.CivilCodeRecordEntity;
 import io.mlqs.es.legal.db.MarriageRegistrationRecordEntity;
 import io.mlqs.es.legal.db.repository.CivilCodeRecordRepository;
+import io.mlqs.utils.BGEUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.File;
@@ -17,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 @SpringBootTest
 @RunWith(SpringRunner.class)
+@ContextConfiguration(classes = MlqsApplication.class)
 public class DocumentTest {
     @Autowired
     private CivilCodeRecordRepository documentRepository;
@@ -47,7 +51,7 @@ public class DocumentTest {
 
     @Test
     public void insert2() {
-        String filePath = "db/data/婚姻登记条例_formatted.json";
+        String filePath = "db/data/婚姻登记条例.json";
         File file = new File(filePath);
         StringBuilder stringBuilder = new StringBuilder();
         //读取文件
@@ -62,11 +66,10 @@ public class DocumentTest {
             e.printStackTrace();
         }
         String json = stringBuilder.toString();
-        System.out.println(json);
-        List<MarriageRegistrationRecordEntity> marriageRegistrationRecordEntities = new ArrayList<>();
+        List<MarriageRegistrationRecordEntity> marriageRegistrationRecordEntities;
         Gson gson = new Gson();
         marriageRegistrationRecordEntities = gson.fromJson(json, new TypeToken<List<MarriageRegistrationRecordEntity>>(){}.getType());
-        System.out.println(marriageRegistrationRecordEntities);
+        System.out.println(marriageRegistrationRecordEntities.size());
 
     }
 
@@ -75,5 +78,12 @@ public class DocumentTest {
     @Test
     public void find() {
         System.out.println(documentService.knn("f**k work",List.of("CivilCode","MarriageRegistration")));
+    }
+
+    @Autowired
+    private Prompt prompt;
+    @Test
+    public void find2() {
+        System.out.println(prompt.getChatPrompt());
     }
 }

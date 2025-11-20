@@ -46,3 +46,4 @@ mlqs:
     report: true
     # 报告的时间表达式
     report-cron: 0 0/1 * * * ?
+
