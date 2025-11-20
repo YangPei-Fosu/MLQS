@@ -1,4 +1,4 @@
-package io.mlqs.es.db;
+package io.mlqs.es.legal.db;
 
 import lombok.Data;
 import org.springframework.data.annotation.Id;
@@ -13,7 +13,7 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 
 @Data
 @Document(indexName = "bas_legal_civil_code", createIndex = true)
-public class CivilCodeRecordEntity extends LegalRegulationsEntity{
+public class CivilCodeRecordEntity extends LegalRecordEntity {
     /**
      * 编号：第XX编
      */

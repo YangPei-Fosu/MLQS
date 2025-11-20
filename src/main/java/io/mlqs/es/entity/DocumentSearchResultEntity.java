@@ -1,7 +1,7 @@
 package io.mlqs.es.entity;
 
 import com.google.gson.Gson;
-import io.mlqs.es.entity.legal.LegalEntity;
+import io.mlqs.es.legal.entity.LegalEntity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -33,6 +33,12 @@ public class DocumentSearchResultEntity {
         return new DocumentSearchResultEntity(new HashMap<>(), new ArrayList<>());
     }
 
+    /**
+     * 添加一个搜索结果
+     * @param key 法律文件名
+     * @param value 法律文件的实体
+     * @return DocumentSearchResultEntity
+     */
     public DocumentSearchResultEntity put(String key, LegalEntity value){
         this.content.put(key, value);
         this.docNames.add(key);

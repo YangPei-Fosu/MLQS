@@ -1,7 +1,7 @@
-package io.mlqs.es.entity.legal.services;
+package io.mlqs.es.legal.entity.services;
 
-import io.mlqs.es.db.LegalRegulationsEntity;
-import io.mlqs.es.entity.legal.LegalEntity;
+import io.mlqs.es.legal.db.LegalRecordEntity;
+import io.mlqs.es.legal.entity.LegalEntity;
 
 import java.util.List;
 
@@ -14,7 +14,7 @@ public interface LegalService {
      * @param context
      * @return 法律条文的列表
      */
-    List<LegalRegulationsEntity> knn(String context);
+    List<LegalRecordEntity> knn(String context);
 
     /**
      * 获取法律实体类
