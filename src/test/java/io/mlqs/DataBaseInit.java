@@ -38,7 +38,6 @@ public class DataBaseInit {
     @Resource
     private ElasticsearchTemplate esTemp;
 
-    //init方法写入数据库的方法需要手动打开（防止手贱）
     @Test
     public void main() {
         if (esTemp.indexOps(MarriageRegistrationRecordEntity.class).exists())
