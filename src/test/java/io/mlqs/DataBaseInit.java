@@ -41,6 +41,7 @@ public class DataBaseInit {
     //init方法写入数据库的方法需要手动打开（防止手贱）
     @Test
     public void main() {
+        LogUtils.log(this.getClass(), "数据初始化中...");
         if (esTemp.indexOps(MarriageRegistrationRecordEntity.class).exists())
             esTemp.indexOps(MarriageRegistrationRecordEntity.class).delete();
         esTemp.indexOps(MarriageRegistrationRecordEntity.class).create();
@@ -53,6 +54,7 @@ public class DataBaseInit {
             esTemp.indexOps(MarriageLawRecordEntity.class).delete();
         esTemp.indexOps(MarriageLawRecordEntity.class).create();
         init3();
+        LogUtils.log(this.getClass(), "数据初始化完成...");
     }
 
     @Test
