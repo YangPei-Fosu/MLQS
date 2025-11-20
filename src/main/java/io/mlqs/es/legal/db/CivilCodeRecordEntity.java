@@ -67,5 +67,5 @@ public class CivilCodeRecordEntity extends LegalRecordEntity {
      * 向量化
      */
     @Field(type = FieldType.Dense_Vector, dims = 1024)
-    private float[] vector;
+    private double[] vector;
 }

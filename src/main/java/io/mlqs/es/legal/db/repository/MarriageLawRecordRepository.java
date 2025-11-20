@@ -5,5 +5,5 @@ import org.springframework.data.elasticsearch.repository.ElasticsearchRepository
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface MarriageLawRepository extends ElasticsearchRepository<MarriageLawRecordEntity, String> {
+public interface MarriageLawRecordRepository extends ElasticsearchRepository<MarriageLawRecordEntity, String> {
 }
