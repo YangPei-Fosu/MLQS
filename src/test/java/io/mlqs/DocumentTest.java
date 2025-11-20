@@ -17,6 +17,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 @SpringBootTest
 @RunWith(SpringRunner.class)
@@ -86,4 +87,13 @@ public class DocumentTest {
     public void find2() {
         System.out.println(prompt.getChatPrompt());
     }
+
+    @Autowired
+    BGEUtils bgeUtils;
+    @Test
+    public void bgetest() {
+        double[] res = bgeUtils.toVector("你好");
+        System.out.println(Arrays.toString(res));
+    }
 }
+
