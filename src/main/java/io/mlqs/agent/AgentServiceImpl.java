@@ -73,11 +73,12 @@ public class AgentServiceImpl implements AgentService{
         return agent;
     }
 
-    //删除代理对象，意味着代理已失效，保存记忆并删除代理与相关的记忆缓存
+    //删除代理对象，意味着代理已失效，写入Mysql
     @Override
     public void remove(String sessionId) {
+        //写入Mysql
         memoryService.saveMemory(sessionId);
-        memoryService.deleteMemoryCache(sessionId);
+        //删除代理对象
         agentMap.remove(sessionId);
         agentAccessTimes.remove(sessionId);
     }

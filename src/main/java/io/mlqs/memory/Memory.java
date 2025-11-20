@@ -1,14 +1,10 @@
 package io.mlqs.memory;
 
 import dev.langchain4j.data.message.ChatMessage;
-import dev.langchain4j.data.message.ChatMessageDeserializer;
-import dev.langchain4j.data.message.ChatMessageSerializer;
 import dev.langchain4j.memory.ChatMemory;
 import dev.langchain4j.memory.chat.MessageWindowChatMemory;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -49,7 +45,7 @@ public class Memory implements ChatMemory {
     @Override
     public void add(ChatMessage chatMessage) {
         delegate.add(chatMessage);
-        memoryService.updateMemory(sessionId, this);
+        memoryService.updateCache(sessionId, this);
     }
 
     @Override
