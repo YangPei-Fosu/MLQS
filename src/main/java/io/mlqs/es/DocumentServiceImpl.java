@@ -9,6 +9,7 @@ import io.mlqs.es.legal.entity.services.MarriageRegistrationServiceImpl;
 import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -88,5 +89,14 @@ public class DocumentServiceImpl implements DocumentService{
     @Override
     public DocumentSearchResultEntity hybridSearch(String context, List<String> legalName) {
         return null;
+    }
+
+    @Override
+    public Map<String, String> getUsableLegalName() {
+        Map<String, String> map = new HashMap<>();
+        for (Legal l: Legal.values()) {
+            map.put(l.name(), getLegalService(l.name()).getLegalEntity().getLawName());
+        }
+        return map;
     }
 }
