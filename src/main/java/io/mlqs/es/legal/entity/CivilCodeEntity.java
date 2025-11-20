@@ -1,6 +1,6 @@
-package io.mlqs.es.entity.legal;
+package io.mlqs.es.legal.entity;
 
-import io.mlqs.es.db.CivilCodeRecordEntity;
+import io.mlqs.es.legal.db.CivilCodeRecordEntity;
 
 /**
  * 民法典实体类

@@ -35,10 +35,17 @@ public class LogUtils {
             System.out.println(new Timestamp(System.currentTimeMillis()) + BLUE + " DEBUG " + RESET + " [" + clazz.getName() + "] " + message);
     }
 
+    public static void debug(Class<?> clazz, String str , Object... args) {
+        if(debug) {
+            System.out.print(new Timestamp(System.currentTimeMillis()) + BLUE + " DEBUG " + RESET + " [" + clazz.getName() + "] ");
+            System.out.println(String.format(str, args));
+        }
+    }
+
     //监控
     public static void report(Class<?> clazz, String reporter, String message) {
         if(report)
-            System.out.println(new Timestamp(System.currentTimeMillis()) + BLUE + " "+ reporter +" " + RESET + " [" + clazz.getName() + "] " + message);
+            System.out.println(new Timestamp(System.currentTimeMillis()) + BLUE + " REPORT ["+ reporter +"] " + RESET + " [" + clazz.getName() + "] " + message);
     }
 
     //进度条

@@ -37,9 +37,12 @@ langchain4j:
 
 mlqs:
   agent:
+    # 代理超时时间，单位秒
     timeout: 300
   log:
-    debug: 1
-    report: 1
-    #报告表达式
+    # debug输出
+    debug: true
+    # 计划报告输出
+    report: true
+    # 报告的时间表达式
     report-cron: 0 0/1 * * * ?

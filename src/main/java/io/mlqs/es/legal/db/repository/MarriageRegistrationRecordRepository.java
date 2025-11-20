@@ -1,6 +1,6 @@
-package io.mlqs.es.db.repository;
+package io.mlqs.es.legal.db.repository;
 
-import io.mlqs.es.db.MarriageRegistrationRecordEntity;
+import io.mlqs.es.legal.db.MarriageRegistrationRecordEntity;
 import org.springframework.data.elasticsearch.repository.ElasticsearchRepository;
 import org.springframework.stereotype.Repository;
 

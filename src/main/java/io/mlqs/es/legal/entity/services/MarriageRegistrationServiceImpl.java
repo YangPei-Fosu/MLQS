@@ -1,8 +1,8 @@
-package io.mlqs.es.entity.legal.services;
+package io.mlqs.es.legal.entity.services;
 
-import io.mlqs.es.db.LegalRegulationsEntity;
-import io.mlqs.es.entity.legal.LegalEntity;
-import io.mlqs.es.entity.legal.MarriageRegistrationEntity;
+import io.mlqs.es.legal.db.LegalRecordEntity;
+import io.mlqs.es.legal.entity.LegalEntity;
+import io.mlqs.es.legal.entity.MarriageRegistrationEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -11,7 +11,7 @@ import java.util.List;
 @Service
 public class MarriageRegistrationServiceImpl implements LegalService{
     @Override
-    public List<LegalRegulationsEntity> knn(String context) {
+    public List<LegalRecordEntity> knn(String context) {
         return new ArrayList<>();
     }
 

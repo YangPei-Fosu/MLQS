@@ -1,6 +1,6 @@
-package io.mlqs.es.entity.legal;
+package io.mlqs.es.legal.entity;
 
-import io.mlqs.es.db.MarriageRegistrationRecordEntity;
+import io.mlqs.es.legal.db.MarriageRegistrationRecordEntity;
 
 /**
  * 婚姻登记法实体类
