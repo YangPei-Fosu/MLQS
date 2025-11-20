@@ -23,6 +23,7 @@
         <mysql-connector.version>8.0.29</mysql-connector.version>
         <mybatis-plus.version>3.5.6</mybatis-plus.version>
         <mybatis.version>3.5.16</mybatis.version>
+        <okhttp3.version>4.12.0</okhttp3.version>
     </properties>
     <dependencies>
         <dependency>
@@ -129,6 +130,12 @@
             <version>6.2.12</version>
         </dependency>
 
+<!--        -->
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>${gson.version}
+            <version>${okhttp3.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
