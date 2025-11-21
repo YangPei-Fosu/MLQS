@@ -1,6 +1,7 @@
 package io.mlqs.es.legal.services;
 
 import io.mlqs.es.legal.db.LegalRecordEntity;
+import io.mlqs.es.legal.db.MarriageLawRecordEntity;
 import io.mlqs.es.legal.db.MarriageRegistrationRecordEntity;
 import io.mlqs.es.legal.db.repository.MarriageLawRecordRepository;
 import io.mlqs.es.legal.entity.LegalEntity;
@@ -15,6 +16,7 @@ import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -22,18 +24,15 @@ import java.util.Set;
 
 @Service
 public class MarriageLawServiceImpl implements LegalService{
-    @Autowired
-    private MarriageLawRecordRepository marriageLawRecordRepository;
-    @Autowired
+    @Resource
     private ElasticsearchTemplate elasticsearchTemplate;
-
     @Autowired
     private RerankUtils rerankUtils;
 
     @Override
     public List<LegalRecordEntity> knn(String context, List<Float> vector) {
         //knn查询
-        int k = 30;
+        int k = 20;
         NativeQuery query = NativeQuery.builder()
                 .withQuery(q -> q
                         .knn(kb -> kb
@@ -42,31 +41,34 @@ public class MarriageLawServiceImpl implements LegalService{
                                 .numCandidates(k * 2)))
                 .withPageable(PageRequest.of(0, k))
                 .build();
-        SearchHits<MarriageRegistrationRecordEntity> searchHits = elasticsearchTemplate.search(query, MarriageRegistrationRecordEntity.class);
-        List<MarriageRegistrationRecordEntity> ms = searchHits.getSearchHits().stream().map(SearchHit::getContent).toList();
+        SearchHits<MarriageLawRecordEntity> searchHits = elasticsearchTemplate.search(query, MarriageLawRecordEntity.class);
+        List<MarriageLawRecordEntity> ms = searchHits.getSearchHits().stream().map(SearchHit::getContent).toList();
         //knn重排
         List<String> documents = new ArrayList<>();
-        for (MarriageRegistrationRecordEntity m : ms)
-            documents.add(m.getContent() + m.getChapterName() + m.getItem() + m.getContent());
-        List<MultiGroup> knn_rerank = rerankUtils.rerank(context, documents, 15, 0.4);
+        for (MarriageLawRecordEntity m : ms)
+            documents.add(m.getChapter() + m.getChapterName() + m.getItem() + m.getContent());
+        List<MultiGroup> knn_rerank = rerankUtils.rerank(context, documents, 10, 0.4);
 
         //关键字查询
         NativeQuery query2 = NativeQuery.builder()
                 .withQuery(q -> q
                         .queryString(qs -> qs
-                                .fields("content", "chapterName", "item")
-                                .query("*" + context + "*")))
+                                .fields("content", "chapterName", "item", "chapter")
+                                .query(context)))
                 .build();
-        SearchHits<MarriageRegistrationRecordEntity> searchHits2 = elasticsearchTemplate.search(query2, MarriageRegistrationRecordEntity.class);
-        List<MarriageRegistrationRecordEntity> ms2 = searchHits2.getSearchHits().stream().map(SearchHit::getContent).toList();
+        SearchHits<MarriageLawRecordEntity> searchHits2 = elasticsearchTemplate.search(query2, MarriageLawRecordEntity.class);
+        List<MarriageLawRecordEntity> ms2 = searchHits2.getSearchHits().stream().map(SearchHit::getContent).toList();
+        //取前15条
+        if(ms2.size() > 15)
+            ms2 = ms2.subList(0, 15);
         //关键字重排
         List<String> documents2 = new ArrayList<>();
-        for (MarriageRegistrationRecordEntity m : ms2)
-            documents2.add(m.getContent() + m.getChapterName() + m.getItem() + m.getContent());
-        List<MultiGroup> keyword_rerank = rerankUtils.rerank(context, documents2, 10, 0.4);
+        for (MarriageLawRecordEntity m : ms2)
+            documents2.add(m.getChapter() + m.getChapterName() + m.getItem() + m.getContent());
+        List<MultiGroup> keyword_rerank = rerankUtils.rerank(context, documents2, 5, 0.4);
 
         //合并rerank结果并去重，使用LinkedHashSet确保顺序
-        Set<MarriageRegistrationRecordEntity> ms3 = new LinkedHashSet<>();
+        Set<MarriageLawRecordEntity> ms3 = new LinkedHashSet<>();
         Set<String> documents3 = new LinkedHashSet<>();
         for (MultiGroup mg : knn_rerank) {
             ms3.add(ms.get(mg.get(0)));
@@ -78,11 +80,14 @@ public class MarriageLawServiceImpl implements LegalService{
         }
 
         //最后对得到的documents3再次rerank
-        List<MultiGroup> final_rerank = rerankUtils.rerank(context, documents3.stream().toList(), 10, 0.4);
+        List<MultiGroup> final_rerank = rerankUtils.rerank(context, documents3.stream().toList(), 5, 0.4);
         List<LegalRecordEntity> final_ms = new ArrayList<>();
-        List<MarriageRegistrationRecordEntity> ms4 = ms3.stream().toList();
-        for (MultiGroup mg : final_rerank)
-            final_ms.add(ms4.get(mg.get(0)));
+        List<MarriageLawRecordEntity> ms4 = ms3.stream().toList();
+        for (MultiGroup mg : final_rerank){
+            MarriageLawRecordEntity me = ms4.get(mg.get(0));
+            me.setVector(null);
+            final_ms.add(me);
+        }
         return final_ms;
     }
 

@@ -11,7 +11,6 @@ def rerank(query, documents):
         "query": query,
         "documents": list(documents)
     }
-    print(payload)
     headers = {
         "accept": "application/json",
         "Content-Type": "application/json"

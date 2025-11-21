@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static io.mlqs.utils.EmbeddingUtils.JSON;
 
@@ -18,6 +19,12 @@ import static io.mlqs.utils.EmbeddingUtils.JSON;
 public class RerankUtils {
     @Value("${mlqs.rerank.url}")
     private String url;
+
+    private static final OkHttpClient client = new OkHttpClient.Builder()
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(60, TimeUnit.SECONDS)
+            .writeTimeout(30, TimeUnit.SECONDS)
+            .build();
 
     /**
      * rerank重排列函数
@@ -29,8 +36,8 @@ public class RerankUtils {
      */
     public List<MultiGroup> rerank(String query, List<String> documents, int topK, double threshold) {
         try {
-            if (documents == null || documents.size() == 0)
-                throw new Exception("文档列表不能为空");
+            if (documents == null)
+                throw new Exception("文档列表不能为null");
             if (topK <= 0)
                 throw new Exception("topK不能小于等于0");
             if(threshold < 0 || threshold > 1)
@@ -39,7 +46,6 @@ public class RerankUtils {
             List<MultiGroup> result = new ArrayList<>();
             LogUtils.debug(this.getClass(),"开始重排列，关联度阈值为"+ threshold);
 
-            OkHttpClient client = new OkHttpClient();
             Gson gson = new Gson();
             String json = "{\"query\":\""+ query +"\", \"documents\": "+ gson.toJson(documents) +" }";
             RequestBody body = RequestBody.create(json, JSON);
