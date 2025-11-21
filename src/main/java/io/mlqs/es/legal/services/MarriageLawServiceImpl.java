@@ -1,0 +1,93 @@
+package io.mlqs.es.legal.services;
+
+import io.mlqs.es.legal.db.LegalRecordEntity;
+import io.mlqs.es.legal.db.MarriageRegistrationRecordEntity;
+import io.mlqs.es.legal.db.repository.MarriageLawRecordRepository;
+import io.mlqs.es.legal.entity.LegalEntity;
+import io.mlqs.es.legal.entity.MarriageLawEntity;
+import io.mlqs.utils.RerankUtils;
+import io.mlqs.utils.clazz.MultiGroup;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.elasticsearch.client.elc.ElasticsearchTemplate;
+import org.springframework.data.elasticsearch.client.elc.NativeQuery;
+import org.springframework.data.elasticsearch.core.SearchHit;
+import org.springframework.data.elasticsearch.core.SearchHits;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+
+@Service
+public class MarriageLawServiceImpl implements LegalService{
+    @Autowired
+    private MarriageLawRecordRepository marriageLawRecordRepository;
+    @Autowired
+    private ElasticsearchTemplate elasticsearchTemplate;
+
+    @Autowired
+    private RerankUtils rerankUtils;
+
+    @Override
+    public List<LegalRecordEntity> knn(String context, List<Float> vector) {
+        //knn查询
+        int k = 30;
+        NativeQuery query = NativeQuery.builder()
+                .withQuery(q -> q
+                        .knn(kb -> kb
+                                .field("vector")
+                                .queryVector(vector)
+                                .numCandidates(k * 2)))
+                .withPageable(PageRequest.of(0, k))
+                .build();
+        SearchHits<MarriageRegistrationRecordEntity> searchHits = elasticsearchTemplate.search(query, MarriageRegistrationRecordEntity.class);
+        List<MarriageRegistrationRecordEntity> ms = searchHits.getSearchHits().stream().map(SearchHit::getContent).toList();
+        //knn重排
+        List<String> documents = new ArrayList<>();
+        for (MarriageRegistrationRecordEntity m : ms)
+            documents.add(m.getContent() + m.getChapterName() + m.getItem() + m.getContent());
+        List<MultiGroup> knn_rerank = rerankUtils.rerank(context, documents, 15, 0.4);
+
+        //关键字查询
+        NativeQuery query2 = NativeQuery.builder()
+                .withQuery(q -> q
+                        .queryString(qs -> qs
+                                .fields("content", "chapterName", "item")
+                                .query("*" + context + "*")))
+                .build();
+        SearchHits<MarriageRegistrationRecordEntity> searchHits2 = elasticsearchTemplate.search(query2, MarriageRegistrationRecordEntity.class);
+        List<MarriageRegistrationRecordEntity> ms2 = searchHits2.getSearchHits().stream().map(SearchHit::getContent).toList();
+        //关键字重排
+        List<String> documents2 = new ArrayList<>();
+        for (MarriageRegistrationRecordEntity m : ms2)
+            documents2.add(m.getContent() + m.getChapterName() + m.getItem() + m.getContent());
+        List<MultiGroup> keyword_rerank = rerankUtils.rerank(context, documents2, 10, 0.4);
+
+        //合并rerank结果并去重，使用LinkedHashSet确保顺序
+        Set<MarriageRegistrationRecordEntity> ms3 = new LinkedHashSet<>();
+        Set<String> documents3 = new LinkedHashSet<>();
+        for (MultiGroup mg : knn_rerank) {
+            ms3.add(ms.get(mg.get(0)));
+            documents3.add(mg.get(2));
+        }
+        for (MultiGroup mg : keyword_rerank) {
+            ms3.add(ms2.get(mg.get(0)));
+            documents3.add(mg.get(2));
+        }
+
+        //最后对得到的documents3再次rerank
+        List<MultiGroup> final_rerank = rerankUtils.rerank(context, documents3.stream().toList(), 10, 0.4);
+        List<LegalRecordEntity> final_ms = new ArrayList<>();
+        List<MarriageRegistrationRecordEntity> ms4 = ms3.stream().toList();
+        for (MultiGroup mg : final_rerank)
+            final_ms.add(ms4.get(mg.get(0)));
+        return final_ms;
+    }
+
+    @Override
+    public LegalEntity getLegalEntity() {
+        return new MarriageLawEntity();
+    }
+}

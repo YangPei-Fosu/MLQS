@@ -46,6 +46,9 @@ mlqs:
     report: true
     # 报告的时间表达式
     report-cron: 0 0/1 * * * ?
-  bge:
+  embedding:
     url: http://localhost:5000/convert
+  rerank:
+    url: http://localhost:5001/rerank
+
 

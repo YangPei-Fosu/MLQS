@@ -12,8 +12,8 @@ import okhttp3.Response;
 import okhttp3.MediaType;
 
 @Component
-public class BGEUtils {
-    @Value("${mlqs.bge.url}")
+public class EmbeddingUtils {
+    @Value("${mlqs.embedding.url}")
     private String url;
     public static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
 
