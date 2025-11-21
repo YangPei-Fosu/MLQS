@@ -8,7 +8,7 @@ import io.mlqs.es.legal.db.MarriageRegistrationRecordEntity;
 import io.mlqs.es.legal.db.repository.CivilCodeRecordRepository;
 import io.mlqs.es.legal.db.repository.MarriageLawRecordRepository;
 import io.mlqs.es.legal.db.repository.MarriageRegistrationRecordRepository;
-import io.mlqs.utils.BGEUtils;
+import io.mlqs.utils.EmbeddingUtils;
 import io.mlqs.utils.LogUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,7 +27,7 @@ import java.util.List;
 @ContextConfiguration(classes = MlqsApplication.class)
 public class DataBaseInit {
     @Autowired
-    private BGEUtils bgeUtils;
+    private EmbeddingUtils embeddingUtils;
     @Autowired
     private MarriageRegistrationRecordRepository marriageRegistrationRecordRepository;
     @Autowired
@@ -81,7 +81,7 @@ public class DataBaseInit {
         marriageRegistrationRecordEntities.forEach(entity -> {
             bar.update(1);
             String s = entity.getChapter() + entity.getChapterName() + entity.getItem() + entity.getContent();
-            entity.setVector(bgeUtils.toVector(s));
+            entity.setVector(embeddingUtils.toVector(s));
         });
 //        marriageRegistrationRecordRepository.saveAll(marriageRegistrationRecordEntities);
         LogUtils.debug(this.getClass(), "婚姻登记条例初始化完成...");
@@ -111,7 +111,7 @@ public class DataBaseInit {
         civilCodeRecordEntities.forEach(entity -> {
             bar.update(1);
             String s = entity.getCode() + entity.getCodeName() + entity.getChapter() + entity.getChapterName() + entity.getSection() + entity.getSectionName() + entity.getItem() + entity.getContent();
-            entity.setVector(bgeUtils.toVector(s));
+            entity.setVector(embeddingUtils.toVector(s));
         });
 //        civilCodeRecordRepository.saveAll(civilCodeRecordEntities);
         LogUtils.debug(this.getClass(), "民法典初始化完成...");
@@ -141,7 +141,7 @@ public class DataBaseInit {
         marriageLawRecordEntities.forEach(entity -> {
             bar.update(1);
             String s = entity.getChapter() + entity.getChapterName() + entity.getItem() + entity.getContent();
-            entity.setVector(bgeUtils.toVector(s));
+            entity.setVector(embeddingUtils.toVector(s));
         });
 //        marriageLawRecordRepository.saveAll(marriageLawRecordEntities);
         LogUtils.debug(this.getClass(), " 婚姻法初始化完成...");

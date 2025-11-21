@@ -2,19 +2,25 @@ package io.mlqs.es;
 import io.mlqs.es.entity.DocumentSearchResultEntity;
 import io.mlqs.es.legal.db.LegalRecordEntity;
 import io.mlqs.es.legal.entity.LegalEntity;
-import io.mlqs.es.legal.entity.services.CivilCodeServiceImpl;
-import io.mlqs.es.legal.entity.services.LegalService;
-import io.mlqs.es.legal.entity.services.MarriageLawServiceImpl;
-import io.mlqs.es.legal.entity.services.MarriageRegistrationServiceImpl;
+import io.mlqs.es.legal.services.CivilCodeServiceImpl;
+import io.mlqs.es.legal.services.LegalService;
+import io.mlqs.es.legal.services.MarriageLawServiceImpl;
+import io.mlqs.es.legal.services.MarriageRegistrationServiceImpl;
+import io.mlqs.utils.EmbeddingUtils;
 import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 @Service
 public class DocumentServiceImpl implements DocumentService{
+    @Autowired
+    private EmbeddingUtils embeddingUtils;
+
     /**
      * 法律文献的Map【法律名，对应的服务类】
      */
@@ -67,18 +73,11 @@ public class DocumentServiceImpl implements DocumentService{
 
             //获取法律实体类
             LegalEntity legalEntity = service.getLegalEntity();
-            //获取Knn检索结果
-            List<LegalRecordEntity> kRecords = service.knn(context);
-            //取出Top10条，不够的话就取全部
-            legalEntity.setRecords(kRecords.subList(0, Math.min(10, kRecords.size())));
-            //如果超过了10条，则将剩余的记录作摘要压缩放到拓展字段中
-            /*
-            if(kRecords.size() > 10){
-                List<LegalRecordEntity> records = kRecords.subList(10, kRecords.size());
-                string 摘要压缩(records);
-                legalEntity.getExtend().put("相关性不强的法条的摘要压缩结果", 摘要);
-            }
-             */
+            List<Float> vector = new ArrayList<>();
+            for (double v : embeddingUtils.toVector(context))
+                vector.add((float) v);
+            List<LegalRecordEntity> knn = service.knn(context, vector);
+            legalEntity.setRecords(knn);
             //放入结果
             result.put(name, legalEntity);
         }
