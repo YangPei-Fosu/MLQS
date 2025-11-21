@@ -19,11 +19,6 @@
 
 注：测试时先在用户表中添加一个用户
 
-## UML类图
-
-https://www.processon.com/v/6909b12d9586bb564a4990ab
-![image-20251106162048407](MQLS.jpg)
-
 ##安装重排模型步骤：
 1、创建虚拟环境
 python -m xinference_env .
@@ -39,3 +34,8 @@ xinference-local --host 127.0.0.1 --port 9997
 xinference launch --model-name bge-reranker-large --model-type rerank --replica 1
 7、等模型下完之后启动服务（src/main/resources/python/rerank_main.py）注意在虚拟环境内启动以免其他问题
 8、运行ExtraServiceTest中的rerank_test()即可测试是否成功
+
+## UML类图
+
+https://www.processon.com/v/6909b12d9586bb564a4990ab
+![image-20251106162048407](MQLS.jpg)
