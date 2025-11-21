@@ -69,15 +69,18 @@ public class LogUtils {
             else
                 System.out.print(new Timestamp(System.currentTimeMillis()) + GREEN + " PROGRESS " + RESET + " [" + c.getName() + "] " + m + " [" + f + "/" + t + "]");
         }
-        public void update(int i){
-            f++;
+        public synchronized void update(int i){
             //覆盖上一条输出
-            if(f < t){
+            if(f < t+1){
+                f = f + i;
                 System.out.print("\u001B[2K\r");
-                System.out.print(new Timestamp(System.currentTimeMillis()) + GREEN + " PROGRESS " + RESET + " [" + c.getName() + "] " + m + " [" + f + "/" + t + "]");
-            }
-            if(f >= t)
+                System.out.printf("%s%s PROGRESS %s [%s] %s [%d/%d]", new Timestamp(System.currentTimeMillis()), GREEN, RESET, c.getName(), m, f, t);
+            }else {
                 System.out.println();
+            }
+        }
+        public void finish(){
+            System.out.println();
         }
     }
     public static Bar progress(Class<?> clazz, String message , int form, int to) {

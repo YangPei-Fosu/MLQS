@@ -11,6 +11,9 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.MediaType;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Component
 public class EmbeddingUtils {
     @Value("${mlqs.embedding.url}")
@@ -37,15 +40,22 @@ public class EmbeddingUtils {
                 JsonArray vectorArray = firstItem.getAsJsonArray("vector");
 
                 double[] vector = new double[vectorArray.size()];
-                LogUtils.debug(this.getClass(),"开始转换");
+                //LogUtils.debug(this.getClass(),"开始转换");
                 for (int i = 0; i < vectorArray.size(); i++)
                     vector[i] = vectorArray.get(i).getAsDouble();
-                LogUtils.debug(this.getClass(),"转换成功");
+                //LogUtils.debug(this.getClass(),"转换成功");
                 return vector;
             }
         } catch (Exception e){
             e.printStackTrace();
         }
         return null;
+    }
+
+    public static List<Float> typeToFloat(double[] vector) {
+        List<Float> list = new ArrayList<>();
+        for (double v : vector)
+            list.add((float) v);
+        return list;
     }
 }

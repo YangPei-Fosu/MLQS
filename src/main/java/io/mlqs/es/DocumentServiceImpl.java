@@ -9,6 +9,7 @@ import io.mlqs.es.legal.services.MarriageRegistrationServiceImpl;
 import io.mlqs.utils.EmbeddingUtils;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -34,11 +35,21 @@ public class DocumentServiceImpl implements DocumentService{
         MarriageRegistration,
         MarriageLaw
     }
+
+    /**
+     * 注入对应的服务类
+     */
+    @Autowired
+    @Qualifier("civilCodeServiceImpl")
+    private LegalService civilCodeService;
+    @Autowired
+    @Qualifier("marriageRegistrationServiceImpl")
+    private LegalService marriageRegistrationService;
     @PostConstruct
     public void init(){
         legalServices = Map.of(
-                Legal.CivilCode, new CivilCodeServiceImpl(),
-                Legal.MarriageRegistration, new MarriageRegistrationServiceImpl(),
+                Legal.CivilCode, civilCodeService,
+                Legal.MarriageRegistration, marriageRegistrationService,
                 Legal.MarriageLaw, new MarriageLawServiceImpl()
         );
     }
@@ -48,7 +59,7 @@ public class DocumentServiceImpl implements DocumentService{
      * @param name
      * @return 服务类
      */
-    private LegalService getLegalService(String name){
+    public LegalService getLegalService(String name){
         for (Legal l: Legal.values()) {
             if(l.name().equals(name))
                 return legalServices.get(l);

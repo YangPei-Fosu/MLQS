@@ -40,4 +40,13 @@ public class MarriageRegistrationRecordEntity extends LegalRecordEntity {
      */
     @Field(type = FieldType.Dense_Vector, dims = 1024)
     private double[] vector;
+
+    public String toStringWithoutVector() {
+        return "MarriageRegistrationRecordEntity{" +
+                "chapter='" + chapter + '\'' +
+                ", chapterName='" + chapterName + '\'' +
+                ", item='" + item + '\'' +
+                ", content='" + content + '\'' +
+                '}';
+    }
 }

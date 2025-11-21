@@ -1,6 +1,7 @@
 package io.mlqs.es;
 
 import io.mlqs.es.entity.DocumentSearchResultEntity;
+import io.mlqs.es.legal.services.LegalService;
 
 import java.util.List;
 import java.util.Map;
@@ -23,4 +24,6 @@ public interface DocumentService {
      * @return 法条名称Map[枚举名称，中文名称]
      */
     Map<String, String> getUsableLegalName();
+
+    LegalService getLegalService(String name);
 }
