@@ -36,6 +36,8 @@
 7. 等模型下完之后启动服务（src/main/resources/python/rerank_main.py）注意在虚拟环境内启动以免其他问题
 8. 运行ExtraServiceTest中的rerank_test()即可测试是否成功
 
+
+
 ## UML类图
 
 https://www.processon.com/v/6909b12d9586bb564a4990ab
