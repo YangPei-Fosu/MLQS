@@ -1,6 +1,7 @@
 package io.mlqs;
 
 import io.mlqs.agent.Prompt;
+import io.mlqs.es.AiToolService;
 import io.mlqs.es.DocumentService;
 import io.mlqs.es.entity.DocumentSearchResultEntity;
 import io.mlqs.es.legal.db.LegalRecordEntity;
@@ -46,12 +47,13 @@ public class test {
         }
     }
 
+    @Autowired
+    private AiToolService aiToolService;
     //检索
     @Test
     public void testMR() {
         //输出的是集合是倒序的，关联度最高的在最下面（Index最大）
-        DocumentSearchResultEntity documentSearchResultEntity = documentService.hybridSearch("结婚证申领", Map.of("MarriageRegistration", 0.3));
-        System.out.println(documentSearchResultEntity);
+        aiToolService.search("1", "如何获得结婚证", Map.of("MarriageRegistration", 0.4));
     }
 
     //关键字匹配
