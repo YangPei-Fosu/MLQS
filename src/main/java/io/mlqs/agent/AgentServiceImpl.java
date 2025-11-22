@@ -5,11 +5,13 @@ import dev.langchain4j.service.AiServices;
 import io.mlqs.es.AiToolService;
 import io.mlqs.memory.MemoryProvider;
 import io.mlqs.memory.MemoryService;
+import io.mlqs.memory.MemoryServiceImpl;
 import io.mlqs.memory.db.MemoryCache;
 import io.mlqs.utils.LogUtils;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.SmartLifecycle;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +20,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 @Data
 @Service
-public class AgentServiceImpl implements AgentService{
+public class AgentServiceImpl implements AgentService , SmartLifecycle {
     //代理集合，key为sessionId，value为代理对象
     private Map<String, Agent> agentMap = new ConcurrentHashMap<>();
 
@@ -108,4 +110,46 @@ public class AgentServiceImpl implements AgentService{
         LogUtils.report(MemoryCache.class, "AgentMap" ,"存活的代理数："+ agentMap.size());
     }
 
+    /**
+     * 结束进程时运行
+     * 若进城结束时若有代理存活则保存信息到Mysql中
+     */
+    private volatile boolean running = true;
+
+    //销毁
+    public void destroy() {
+        try {
+            if(agentMap.size() > 0){
+                LogUtils.log(MemoryServiceImpl.class, "正在存储全部缓存信息。共" + agentMap.size() + "条数据");
+                for (String sessionId : agentMap.keySet()) {
+                    remove(sessionId);
+                }
+            }
+            LogUtils.log(MemoryServiceImpl.class, "存储完成。");
+        }catch (Exception e){
+            LogUtils.log(MemoryServiceImpl.class, "存储失败。");
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void start() {
+        running = true;
+    }
+
+    @Override
+    public void stop() {
+        destroy();
+        running = false;
+    }
+
+    @Override
+    public boolean isRunning() {
+        return running;
+    }
+
+    @Override
+    public int getPhase() {
+        return Integer.MAX_VALUE;
+    }
 }

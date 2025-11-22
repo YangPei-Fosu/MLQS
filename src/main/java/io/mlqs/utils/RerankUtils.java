@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -44,6 +45,8 @@ public class RerankUtils {
                 throw new Exception("关联度阈值范围必须在[0,1]内");
 
             List<MultiGroup> result = new ArrayList<>();
+            if(documents.size() == 0)
+                return result;
             LogUtils.debug(this.getClass(),"开始重排列，关联度阈值为"+ threshold);
 
             Gson gson = new Gson();
@@ -82,6 +85,22 @@ public class RerankUtils {
             ex.printStackTrace();
         }
         return null;
+    }
+
+    /**
+     * 反转集合
+     * @param collection 集合
+     * @param <T> 集合元素类型
+     * @return 反转后的集合
+     */
+    public static <T> Collection<T> reverse(Collection<T> collection) {
+        List<T> list = new ArrayList<>(collection);
+        for (int i = 0; i < list.size() / 2; i++) {
+            T temp = list.get(i);
+            list.set(i, list.get(list.size() - i - 1));
+            list.set(list.size() - i - 1, temp);
+        }
+        return list;
     }
 }
 /**返回数据结构

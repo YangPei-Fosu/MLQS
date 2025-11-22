@@ -25,7 +25,7 @@ public class EmbeddingUtils {
         try {
             OkHttpClient client = new OkHttpClient();
 
-            String json = "[{\"content\":\""+ context +"\", \"vector\":\"\"}]";
+            String json = "[{\"content\":\"" + context + "\", \"vector\":\"\"}]";
             RequestBody body = RequestBody.create(json, JSON);
             Request request = new Request.Builder()
                     .url(url)
@@ -46,12 +46,17 @@ public class EmbeddingUtils {
                 //LogUtils.debug(this.getClass(),"转换成功");
                 return vector;
             }
-        } catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
     }
 
+    /**
+     * 将double[]转换成List<Float>
+     * @param vector double[]
+     * @return List<Float>
+     */
     public static List<Float> typeToFloat(double[] vector) {
         List<Float> list = new ArrayList<>();
         for (double v : vector)
