@@ -2,15 +2,14 @@ package io.mlqs;
 
 import io.mlqs.agent.Prompt;
 import io.mlqs.es.DocumentService;
+import io.mlqs.es.entity.DocumentSearchResultEntity;
 import io.mlqs.es.legal.db.LegalRecordEntity;
 import io.mlqs.es.legal.db.MarriageRegistrationRecordEntity;
 import io.mlqs.es.legal.services.LegalService;
-import io.mlqs.es.legal.services.MarriageRegistrationServiceImpl;
 import io.mlqs.utils.EmbeddingUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.elasticsearch.client.elc.ElasticsearchTemplate;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
@@ -21,8 +20,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
@@ -39,13 +38,20 @@ public class test {
     //检索
     @Test
     public void testMRRS() {
-        assertNotNull(elasticsearchTemplate);
         String query = "离婚需要什么证件？";
         LegalService marriageRegistration = documentService.getLegalService("MarriageRegistration");
-        List<LegalRecordEntity> knn = marriageRegistration.knn(query, EmbeddingUtils.typeToFloat(embeddingUtils.toVector(query)));
+        List<LegalRecordEntity> knn = marriageRegistration.query(query, EmbeddingUtils.typeToFloat(embeddingUtils.toVector(query)),0.9);
         for (LegalRecordEntity record : knn) {
             System.out.println(record);
         }
+    }
+
+    //检索
+    @Test
+    public void testMR() {
+        //输出的是集合是倒序的，关联度最高的在最下面（Index最大）
+        DocumentSearchResultEntity documentSearchResultEntity = documentService.hybridSearch("结婚证申领", Map.of("MarriageRegistration", 0.3));
+        System.out.println(documentSearchResultEntity);
     }
 
     //关键字匹配

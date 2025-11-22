@@ -18,7 +18,7 @@ import java.util.List;
 
 @Service
 @Data
-public class MemoryServiceImpl implements MemoryService, SmartLifecycle {
+public class MemoryServiceImpl implements MemoryService {
     //Mysql记忆存储Dao
     @Autowired
     private MemoryMapper memoryMapper;
@@ -109,51 +109,5 @@ public class MemoryServiceImpl implements MemoryService, SmartLifecycle {
     @Override
     public void deleteCache(String sessionId) {
         memoryCache.remove(sessionId);
-    }
-
-    /**
-     * 结束进程时运行
-     * 若进城结束时缓存中存在数据，则保存到Mysql中
-     */
-    private volatile boolean running = true;
-
-    //销毁
-    public void destroy() {
-        try {
-            int size = memoryCache.size();
-            LogUtils.log(MemoryServiceImpl.class, "正在存储全部缓存信息。共" + size + "条数据");
-            LogUtils.Bar progress = LogUtils.progress(MemoryServiceImpl.class, "正在存储全部缓存信息。", 0, size);
-            progress.start();
-            for (String s : memoryCache.Iterator()) {
-                saveMemory(s);
-                this.deleteCache(s);
-                progress.update(1);
-            }
-            LogUtils.log(MemoryServiceImpl.class, "存储完成。");
-        }catch (Exception e){
-            LogUtils.log(MemoryServiceImpl.class, "存储失败。");
-            e.printStackTrace();
-        }
-    }
-
-    @Override
-    public void start() {
-        running = true;
-    }
-
-    @Override
-    public void stop() {
-        destroy();
-        running = false;
-    }
-
-    @Override
-    public boolean isRunning() {
-        return running;
-    }
-
-    @Override
-    public int getPhase() {
-        return Integer.MAX_VALUE;
     }
 }

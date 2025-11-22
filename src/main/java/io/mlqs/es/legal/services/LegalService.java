@@ -10,11 +10,13 @@ import java.util.List;
  */
 public interface LegalService {
     /**
-     * 基于Knn向量化检索
-     * @param context
+     * 混合检索
+     * @param context 检索内容
+     * @param vector 检索内容向量化
+     * @param threshold 搜索阈值
      * @return 法律条文的列表
      */
-    List<LegalRecordEntity> knn(String context,List<Float> vector);
+    List<LegalRecordEntity> query(String context, List<Float> vector, double threshold);
 
     /**
      * 获取法律实体类

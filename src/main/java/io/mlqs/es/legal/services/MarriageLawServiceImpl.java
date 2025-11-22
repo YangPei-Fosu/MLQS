@@ -2,8 +2,6 @@ package io.mlqs.es.legal.services;
 
 import io.mlqs.es.legal.db.LegalRecordEntity;
 import io.mlqs.es.legal.db.MarriageLawRecordEntity;
-import io.mlqs.es.legal.db.MarriageRegistrationRecordEntity;
-import io.mlqs.es.legal.db.repository.MarriageLawRecordRepository;
 import io.mlqs.es.legal.entity.LegalEntity;
 import io.mlqs.es.legal.entity.MarriageLawEntity;
 import io.mlqs.utils.RerankUtils;
@@ -30,7 +28,7 @@ public class MarriageLawServiceImpl implements LegalService{
     private RerankUtils rerankUtils;
 
     @Override
-    public List<LegalRecordEntity> knn(String context, List<Float> vector) {
+    public List<LegalRecordEntity> query(String context, List<Float> vector, double threshold) {
         //knn查询
         int k = 20;
         NativeQuery query = NativeQuery.builder()
@@ -47,7 +45,7 @@ public class MarriageLawServiceImpl implements LegalService{
         List<String> documents = new ArrayList<>();
         for (MarriageLawRecordEntity m : ms)
             documents.add(m.getChapter() + m.getChapterName() + m.getItem() + m.getContent());
-        List<MultiGroup> knn_rerank = rerankUtils.rerank(context, documents, 10, 0.4);
+        List<MultiGroup> knn_rerank = rerankUtils.rerank(context, documents, 10, threshold);
 
         //关键字查询
         NativeQuery query2 = NativeQuery.builder()
@@ -65,7 +63,7 @@ public class MarriageLawServiceImpl implements LegalService{
         List<String> documents2 = new ArrayList<>();
         for (MarriageLawRecordEntity m : ms2)
             documents2.add(m.getChapter() + m.getChapterName() + m.getItem() + m.getContent());
-        List<MultiGroup> keyword_rerank = rerankUtils.rerank(context, documents2, 5, 0.4);
+        List<MultiGroup> keyword_rerank = rerankUtils.rerank(context, documents2, 5, threshold);
 
         //合并rerank结果并去重，使用LinkedHashSet确保顺序
         Set<MarriageLawRecordEntity> ms3 = new LinkedHashSet<>();
@@ -80,7 +78,7 @@ public class MarriageLawServiceImpl implements LegalService{
         }
 
         //最后对得到的documents3再次rerank
-        List<MultiGroup> final_rerank = rerankUtils.rerank(context, documents3.stream().toList(), 5, 0.4);
+        List<MultiGroup> final_rerank = rerankUtils.rerank(context, documents3.stream().toList(), 5, threshold);
         List<LegalRecordEntity> final_ms = new ArrayList<>();
         List<MarriageLawRecordEntity> ms4 = ms3.stream().toList();
         for (MultiGroup mg : final_rerank){

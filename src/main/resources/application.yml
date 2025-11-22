@@ -4,9 +4,9 @@ spring:
 #    enabled: true
 
   datasource:
-    url: jdbc:mysql://localhost:3306/yangpei?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
+    url: jdbc:mysql://localhost:3306/fsgs?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
     driver-class-name: com.mysql.cj.jdbc.Driver
-    password: root
+    password: Yp200458
     username: root
     initial-size: 5
     max-active: 15
@@ -33,7 +33,8 @@ langchain4j:
         type: in-memory
         max-messages: 20
         max-tokens: 1024
-        enable-search: true
+        enable-search: false
+        tool-choice: auto
 
 mlqs:
   agent:

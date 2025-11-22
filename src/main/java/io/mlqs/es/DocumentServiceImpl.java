@@ -2,11 +2,10 @@ package io.mlqs.es;
 import io.mlqs.es.entity.DocumentSearchResultEntity;
 import io.mlqs.es.legal.db.LegalRecordEntity;
 import io.mlqs.es.legal.entity.LegalEntity;
-import io.mlqs.es.legal.services.CivilCodeServiceImpl;
 import io.mlqs.es.legal.services.LegalService;
 import io.mlqs.es.legal.services.MarriageLawServiceImpl;
-import io.mlqs.es.legal.services.MarriageRegistrationServiceImpl;
 import io.mlqs.utils.EmbeddingUtils;
+import io.mlqs.utils.RerankUtils;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -68,15 +67,16 @@ public class DocumentServiceImpl implements DocumentService{
     }
 
     /**
-     * Knn检索各个法律文献
+     * 检索各个法律文献
      * @param context 检索内容
-     * @param legalNames 需要检索的法律文件名字，注意是在枚举中的:[CivilCode,MarriageRegistration,MarriageLaw]
+     * @param legalNames 需要检索的法律文件名字，注意是在枚举中的:[CivilCode,MarriageRegistration,MarriageLaw]，值为关联度阈值
      * @return 搜索结果
      */
     @Override
-    public DocumentSearchResultEntity knn(String context, List<String> legalNames) {
+    public DocumentSearchResultEntity hybridSearch(String context, Map<String, Double> legalNames) {
         DocumentSearchResultEntity result = DocumentSearchResultEntity.build();
-        for (String name: legalNames){
+        List<Float> vector = EmbeddingUtils.typeToFloat(embeddingUtils.toVector(context));
+        for (String name: legalNames.keySet()){
             //获取法律文件对应的服务类
             LegalService service = getLegalService(name);
             if (service == null)
@@ -84,21 +84,14 @@ public class DocumentServiceImpl implements DocumentService{
 
             //获取法律实体类
             LegalEntity legalEntity = service.getLegalEntity();
-            List<Float> vector = new ArrayList<>();
-            for (double v : embeddingUtils.toVector(context))
-                vector.add((float) v);
-            List<LegalRecordEntity> knn = service.knn(context, vector);
-            legalEntity.setRecords(knn);
+            List<LegalRecordEntity> qr = service.query(context, vector, legalNames.get(name));
+            //反转qr
+            qr = (List<LegalRecordEntity>) RerankUtils.reverse(qr);
+            legalEntity.setRecords(qr);
             //放入结果
             result.put(name, legalEntity);
         }
         return result;
-    }
-
-    //Knn+关键字搜索
-    @Override
-    public DocumentSearchResultEntity hybridSearch(String context, List<String> legalName) {
-        return null;
     }
 
     @Override
