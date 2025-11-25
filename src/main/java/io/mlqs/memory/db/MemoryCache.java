@@ -2,10 +2,12 @@ package io.mlqs.memory.db;
 
 import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.data.message.ChatMessageDeserializer;
-import io.mlqs.utils.LogUtils;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Marker;
+import org.slf4j.MarkerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -19,12 +21,14 @@ import java.util.concurrent.TimeUnit;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Slf4j
 /**
  * redis缓存记忆实现记忆的快速查找
  * 缓存的key为sessionId
  * 缓存的value为Memory类
  */
 public class MemoryCache {
+    private static final Marker REIDS_MARKER = MarkerFactory.getMarker("REDIS");
     @Autowired
     private RedisTemplate<String, Object> rt;
 
@@ -63,6 +67,6 @@ public class MemoryCache {
     //设置定时任务输出缓存条目，每分钟执行
     @Scheduled(cron = "${mlqs.log.report-cron}")
     public void schedule() {
-        LogUtils.report(MemoryCache.class, "Redis" ,"缓存条目数：" + rt.keys("*").size());
+        log.debug(REIDS_MARKER, "缓存(Redis)条目数：" + size());
     }
 }

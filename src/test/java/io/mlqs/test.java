@@ -8,6 +8,7 @@ import io.mlqs.es.legal.db.LegalRecordEntity;
 import io.mlqs.es.legal.db.MarriageRegistrationRecordEntity;
 import io.mlqs.es.legal.services.LegalService;
 import io.mlqs.utils.EmbeddingUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,7 @@ import java.util.Map;
 @SpringBootTest
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = MlqsApplication.class)
+@Slf4j
 public class test {
     @Autowired
     private EmbeddingUtils embeddingUtils;
@@ -80,4 +82,5 @@ public class test {
         String chatPrompt = prompt.getChatPrompt();
         System.out.println(chatPrompt);
     }
+
 }

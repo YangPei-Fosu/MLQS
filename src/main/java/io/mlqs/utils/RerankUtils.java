@@ -2,6 +2,7 @@ package io.mlqs.utils;
 
 import com.google.gson.*;
 import io.mlqs.utils.clazz.MultiGroup;
+import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
@@ -17,6 +18,7 @@ import java.util.concurrent.TimeUnit;
 import static io.mlqs.utils.EmbeddingUtils.JSON;
 
 @Component
+@Slf4j
 public class RerankUtils {
     @Value("${mlqs.rerank.url}")
     private String url;
@@ -47,7 +49,7 @@ public class RerankUtils {
             List<MultiGroup> result = new ArrayList<>();
             if(documents.size() == 0)
                 return result;
-            LogUtils.debug(this.getClass(),"开始重排列，关联度阈值为"+ threshold);
+            log.debug("开始重排列，关联度阈值为："+ threshold);
 
             Gson gson = new Gson();
             String json = "{\"query\":\""+ query +"\", \"documents\": "+ gson.toJson(documents) +" }";
@@ -78,7 +80,7 @@ public class RerankUtils {
                         break;
                 }
             }
-            LogUtils.debug(this.getClass(),"重排列完成");
+            log.debug("重排列完成，返回的文档数：" + top);
             return result;
         }
         catch (Exception ex) {

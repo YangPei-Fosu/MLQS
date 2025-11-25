@@ -5,10 +5,10 @@ import dev.langchain4j.service.AiServices;
 import io.mlqs.es.AiToolService;
 import io.mlqs.memory.MemoryProvider;
 import io.mlqs.memory.MemoryService;
-import io.mlqs.memory.MemoryServiceImpl;
-import io.mlqs.memory.db.MemoryCache;
-import io.mlqs.utils.LogUtils;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Marker;
+import org.slf4j.MarkerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.SmartLifecycle;
@@ -20,7 +20,10 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 @Data
 @Service
+@Slf4j
 public class AgentServiceImpl implements AgentService , SmartLifecycle {
+    private static final Marker AGENT_MARKER = MarkerFactory.getMarker("AGENT");
+
     //代理集合，key为sessionId，value为代理对象
     private Map<String, Agent> agentMap = new ConcurrentHashMap<>();
 
@@ -107,7 +110,8 @@ public class AgentServiceImpl implements AgentService , SmartLifecycle {
 
     @Scheduled(cron = "${mlqs.log.report-cron}")
     public void schedule() {
-        LogUtils.report(MemoryCache.class, "AgentMap" ,"存活的代理数："+ agentMap.size());
+        //输出信息
+        log.debug(AGENT_MARKER, "存活的代理数：" + agentMap.size());
     }
 
     /**
@@ -120,14 +124,16 @@ public class AgentServiceImpl implements AgentService , SmartLifecycle {
     public void destroy() {
         try {
             if(agentMap.size() > 0){
-                LogUtils.log(MemoryServiceImpl.class, "正在存储全部缓存信息。共" + agentMap.size() + "条数据");
+                log.info(AGENT_MARKER, "正在存储全部代理信息。共" + agentMap.size() + "条数据");
                 for (String sessionId : agentMap.keySet()) {
                     remove(sessionId);
+                    //同时移除缓存内的记录
+                    memoryService.deleteCache(sessionId);
                 }
             }
-            LogUtils.log(MemoryServiceImpl.class, "存储完成。");
+            log.info(AGENT_MARKER, "全部代理信息存储完成。");
         }catch (Exception e){
-            LogUtils.log(MemoryServiceImpl.class, "存储失败。");
+            log.error(AGENT_MARKER, "存储失败。");
             e.printStackTrace();
         }
     }
