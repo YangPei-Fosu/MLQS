@@ -1,5 +1,6 @@
 package io.mlqs.memory;
 
+import com.mysql.cj.log.Log;
 import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.data.message.ChatMessageDeserializer;
 import dev.langchain4j.data.message.ChatMessageSerializer;
@@ -7,9 +8,10 @@ import dev.langchain4j.memory.ChatMemory;
 import io.mlqs.memory.db.MemoryCache;
 import io.mlqs.memory.db.MemoryEntity;
 import io.mlqs.memory.db.MemoryMapper;
+import io.mlqs.utils.LogUtils;
 import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.SmartLifecycle;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
@@ -17,7 +19,6 @@ import java.util.List;
 
 @Service
 @Data
-@Slf4j
 public class MemoryServiceImpl implements MemoryService {
     //Mysql记忆存储Dao
     @Autowired
@@ -41,15 +42,17 @@ public class MemoryServiceImpl implements MemoryService {
     public ChatMemory getMemory(String sessionId) {
         Memory memory;
         List<ChatMessage> chatMessages = memoryCache.get(sessionId);
+        LogUtils.log(MemoryServiceImpl.class, "从缓存中获取记忆：" + chatMessages);
         //缓存中不存在则从Mysql中获取
         if (chatMessages == null) {
             MemoryEntity memoryEntity = memoryMapper.selectById(sessionId);
             memory = new Memory(this, sessionId, 20);
+            LogUtils.log(MemoryServiceImpl.class, "从Mysql中获取记忆：" + memoryEntity.getMemory());
             //有可能Mysql的记忆也不存在，则创建一个空的记忆
             chatMessages = ChatMessageDeserializer.messagesFromJson(memoryEntity==null? "[]" : memoryEntity.getMemory());
             for (ChatMessage chatMessage : chatMessages)
                 memory.add(chatMessage);
-            memoryCache.set(sessionId, ChatMessageSerializer.messagesToJson(memory.messages()));
+            memoryCache.set(sessionId, ChatMessageSerializer.messagesToJson(chatMessages));
         }else {
             //缓存中存在则从缓存中获取
             memory = new Memory(this,sessionId, 20);

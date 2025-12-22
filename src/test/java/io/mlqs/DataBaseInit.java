@@ -9,7 +9,7 @@ import io.mlqs.es.legal.db.repository.CivilCodeRecordRepository;
 import io.mlqs.es.legal.db.repository.MarriageLawRecordRepository;
 import io.mlqs.es.legal.db.repository.MarriageRegistrationRecordRepository;
 import io.mlqs.utils.EmbeddingUtils;
-import lombok.extern.slf4j.Slf4j;
+import io.mlqs.utils.LogUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +25,6 @@ import java.util.List;
 @SpringBootTest
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = MlqsApplication.class)
-@Slf4j
 public class DataBaseInit {
     @Autowired
     private EmbeddingUtils embeddingUtils;
@@ -41,7 +40,7 @@ public class DataBaseInit {
 
     @Test
     public void main() {
-        log.debug("数据初始化中...");
+        LogUtils.log(this.getClass(), "数据初始化中...");
         if (esTemp.indexOps(MarriageRegistrationRecordEntity.class).exists())
             esTemp.indexOps(MarriageRegistrationRecordEntity.class).delete();
         esTemp.indexOps(MarriageRegistrationRecordEntity.class).create();
@@ -54,12 +53,12 @@ public class DataBaseInit {
             esTemp.indexOps(MarriageLawRecordEntity.class).delete();
         esTemp.indexOps(MarriageLawRecordEntity.class).create();
         init3();
-        log.debug("数据初始化完成...");
+        LogUtils.log(this.getClass(), "数据初始化完成...");
     }
 
     @Test
     public void init() {
-        log.debug("婚姻登记条例初始化中...");
+        LogUtils.debug(this.getClass(), "婚姻登记条例初始化中...");
         String filePath = "db/data/婚姻登记条例.json";
         File file = new File(filePath);
         StringBuilder stringBuilder = new StringBuilder();
@@ -77,17 +76,21 @@ public class DataBaseInit {
         List<MarriageRegistrationRecordEntity> marriageRegistrationRecordEntities;
         Gson gson = new Gson();
         marriageRegistrationRecordEntities = gson.fromJson(json, new TypeToken<List<MarriageRegistrationRecordEntity>>(){}.getType());
+        LogUtils.Bar bar = LogUtils.progress(this.getClass(), "向量化字符串", 0, marriageRegistrationRecordEntities.size());
+        bar.start();
         marriageRegistrationRecordEntities.forEach(entity -> {
+            bar.update(1);
             String s = entity.getChapter() + entity.getChapterName() + entity.getItem() + entity.getContent();
             entity.setVector(embeddingUtils.toVector(s));
         });
+        bar.finish();
 //        marriageRegistrationRecordRepository.saveAll(marriageRegistrationRecordEntities);
-        log.debug("婚姻登记条例初始化完成...");
+        LogUtils.debug(this.getClass(), "婚姻登记条例初始化完成...");
     }
 
     @Test
     public void init2() {
-        log.debug("民法典初始化中...");
+        LogUtils.debug(this.getClass(), "民法典初始化中...");
         String filePath = "db/data/民法典.json";
         File file = new File(filePath);
         StringBuilder stringBuilder = new StringBuilder();
@@ -104,17 +107,21 @@ public class DataBaseInit {
         List<CivilCodeRecordEntity> civilCodeRecordEntities;
         Gson gson = new Gson();
         civilCodeRecordEntities = gson.fromJson(json, new TypeToken<List<CivilCodeRecordEntity>>(){}.getType());
+        LogUtils.Bar bar = LogUtils.progress(this.getClass(), "向量化字符串", 0, civilCodeRecordEntities.size());
+        bar.start();
         civilCodeRecordEntities.forEach(entity -> {
+            bar.update(1);
             String s = entity.getCode() + entity.getCodeName() + entity.getChapter() + entity.getChapterName() + entity.getSection() + entity.getSectionName() + entity.getItem() + entity.getContent();
             entity.setVector(embeddingUtils.toVector(s));
         });
+        bar.finish();
 //        civilCodeRecordRepository.saveAll(civilCodeRecordEntities);
-        log.debug("民法典初始化完成...");
+        LogUtils.debug(this.getClass(), "民法典初始化完成...");
     }
 
     @Test
     public void init3() {
-        log.debug("婚姻法初始化中...");
+        LogUtils.debug(this.getClass(), "婚姻法初始化中...");
         String filePath = "db/data/婚姻法.json";
         File file = new File(filePath);
         StringBuilder stringBuilder = new StringBuilder();
@@ -131,11 +138,15 @@ public class DataBaseInit {
         List<MarriageLawRecordEntity> marriageLawRecordEntities;
         Gson gson = new Gson();
         marriageLawRecordEntities = gson.fromJson(json, new TypeToken<List<MarriageLawRecordEntity>>(){}.getType());
+        LogUtils.Bar bar = LogUtils.progress(this.getClass(), "向量化字符串", 0, marriageLawRecordEntities.size());
+        bar.start();
         marriageLawRecordEntities.forEach(entity -> {
+            bar.update(1);
             String s = entity.getChapter() + entity.getChapterName() + entity.getItem() + entity.getContent();
             entity.setVector(embeddingUtils.toVector(s));
         });
+        bar.finish();
 //        marriageLawRecordRepository.saveAll(marriageLawRecordEntities);
-        log.debug("婚姻法初始化完成...");
+        LogUtils.debug(this.getClass(), " 婚姻法初始化完成...");
     }
 }
