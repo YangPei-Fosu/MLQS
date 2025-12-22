@@ -16,12 +16,15 @@ public class UserController {
     @PostMapping("/login")
     public HttpRespondDTO login(@RequestBody Map<String,String> request) {
         String uid = userService.login(request.get("account"), request.get("password"));
-        return HttpRespondDTO.ok().put("uid", uid);
+        if (uid!=null) return HttpRespondDTO.ok().put("uid", uid);
+        else return HttpRespondDTO.error();
     }
 //
     @PostMapping("/register")
     public HttpRespondDTO register(@RequestBody Map<String,String> request) {
         String uid = userService.register(request.get("account"), request.get("password"));
+        if(uid==null)
+            return HttpRespondDTO.error().put("message","账号已存在");
         return HttpRespondDTO.ok().put("uid", uid);
     }
 

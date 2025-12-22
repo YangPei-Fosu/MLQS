@@ -19,6 +19,9 @@ public class ChatController {
         String uid = request.get("user_id");
         String sid = request.get("session_id");
         String message = request.get("userMessage");
+
+        if(uid==null)
+            return HttpRespondDTO.error();
         if(Objects.equals(sid, "")) sid = null;
         Map<String, String> result = chatService.chat(uid ,sid, message);
         return HttpRespondDTO.ok().put("sessionId", result.get("sessionId")).put("context", result.get("context"));
@@ -26,7 +29,11 @@ public class ChatController {
 
     @PostMapping("/chat/delete")
     public HttpRespondDTO delete(@RequestBody Map<String,String> request) {
+
         String uid = request.get("user_id");
+        if(uid==null)
+            return HttpRespondDTO.error();
+
         String sessionId = request.get("session_id");
         chatService.deleteChat(uid, sessionId);
         return HttpRespondDTO.ok();
@@ -42,6 +49,8 @@ public class ChatController {
     @PostMapping("/chat/getSessions")
     public HttpRespondDTO getSessions(@RequestBody Map<String,String> request) {
         String uid = request.get("user_id");
+        if(uid==null)
+            return HttpRespondDTO.error();
         List<String> sessions = chatService.getSessions(uid);
         return HttpRespondDTO.ok().put("sessions", sessions);
     }
