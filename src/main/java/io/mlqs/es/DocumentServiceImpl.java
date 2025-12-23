@@ -44,12 +44,15 @@ public class DocumentServiceImpl implements DocumentService{
     @Autowired
     @Qualifier("marriageRegistrationServiceImpl")
     private LegalService marriageRegistrationService;
+    @Autowired
+    @Qualifier("marriageLawServiceImpl")
+    private LegalService marriageLawServiceImpl;
     @PostConstruct
     public void init(){
         legalServices = Map.of(
                 Legal.CivilCode, civilCodeService,
                 Legal.MarriageRegistration, marriageRegistrationService,
-                Legal.MarriageLaw, new MarriageLawServiceImpl()
+                Legal.MarriageLaw, marriageLawServiceImpl
         );
     }
 

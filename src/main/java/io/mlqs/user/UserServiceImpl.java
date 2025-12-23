@@ -32,9 +32,6 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public String register(String account, String password) {
-        if (userMapper.selectById(account) != null){
-            return null;
-        }
         String userId = UUID.randomUUID().toString();
         UserEntity userEntity = new UserEntity();
         userEntity.setAccount(account);
