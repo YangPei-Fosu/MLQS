@@ -84,7 +84,7 @@ public class DataBaseInit {
             entity.setVector(embeddingUtils.toVector(s));
         });
         bar.finish();
-//        marriageRegistrationRecordRepository.saveAll(marriageRegistrationRecordEntities);
+        marriageRegistrationRecordRepository.saveAll(marriageRegistrationRecordEntities);
         LogUtils.debug(this.getClass(), "婚姻登记条例初始化完成...");
     }
 
@@ -115,7 +115,7 @@ public class DataBaseInit {
             entity.setVector(embeddingUtils.toVector(s));
         });
         bar.finish();
-//        civilCodeRecordRepository.saveAll(civilCodeRecordEntities);
+        civilCodeRecordRepository.saveAll(civilCodeRecordEntities);
         LogUtils.debug(this.getClass(), "民法典初始化完成...");
     }
 
@@ -146,7 +146,7 @@ public class DataBaseInit {
             entity.setVector(embeddingUtils.toVector(s));
         });
         bar.finish();
-//        marriageLawRecordRepository.saveAll(marriageLawRecordEntities);
+        marriageLawRecordRepository.saveAll(marriageLawRecordEntities);
         LogUtils.debug(this.getClass(), " 婚姻法初始化完成...");
     }
 }
