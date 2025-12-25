@@ -51,5 +51,8 @@ mlqs:
     url: http://localhost:5000/convert
   rerank:
     url: http://localhost:5001/rerank
+  search:
+    thread-pool-size: 20
+    use-parallel-search: true
 
 

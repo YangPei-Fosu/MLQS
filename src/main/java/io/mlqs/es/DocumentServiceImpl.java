@@ -3,23 +3,42 @@ import io.mlqs.es.entity.DocumentSearchResultEntity;
 import io.mlqs.es.legal.db.LegalRecordEntity;
 import io.mlqs.es.legal.entity.LegalEntity;
 import io.mlqs.es.legal.services.LegalService;
-import io.mlqs.es.legal.services.MarriageLawServiceImpl;
 import io.mlqs.utils.EmbeddingUtils;
+import io.mlqs.utils.LogUtils;
 import io.mlqs.utils.RerankUtils;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 @Service
 public class DocumentServiceImpl implements DocumentService{
     @Autowired
     private EmbeddingUtils embeddingUtils;
+
+    /**
+     * 执行搜索的线程池大小
+     */
+    @Value("${mlqs.search.thread-pool-size}")
+    private int threadPoolSize;
+    /**
+     * 搜索线程池
+     */
+    private ExecutorService searchPool;
+    /**
+     * 是否使用并行搜索
+     */
+    @Value("${mlqs.search.use-parallel-search}")
+    private boolean parallel;
 
     /**
      * 法律文献的Map【法律名，对应的服务类】
@@ -54,6 +73,15 @@ public class DocumentServiceImpl implements DocumentService{
                 Legal.MarriageRegistration, marriageRegistrationService,
                 Legal.MarriageLaw, marriageLawServiceImpl
         );
+        //如果不使用并行搜索，就不需要创建线程池
+        if(parallel == true){
+            //创建线程池
+            searchPool = Executors.newFixedThreadPool(threadPoolSize);
+            LogUtils.log(DocumentServiceImpl.class, "已启用并行检索");
+            LogUtils.log(DocumentServiceImpl.class, "创建检索线程池成功，线程数：" + threadPoolSize);
+        }else {
+            LogUtils.log(DocumentServiceImpl.class, "已禁用并行检索");
+        }
     }
 
     /**
@@ -77,23 +105,67 @@ public class DocumentServiceImpl implements DocumentService{
      */
     @Override
     public DocumentSearchResultEntity hybridSearch(String context, Map<String, Double> legalNames) {
+        //开始检索时间点
+        long start = System.currentTimeMillis();
         DocumentSearchResultEntity result = DocumentSearchResultEntity.build();
         List<Float> vector = EmbeddingUtils.typeToFloat(embeddingUtils.toVector(context));
-        for (String name: legalNames.keySet()){
-            //获取法律文件对应的服务类
-            LegalService service = getLegalService(name);
-            if (service == null)
-                continue;
-
-            //获取法律实体类
-            LegalEntity legalEntity = service.getLegalEntity();
-            List<LegalRecordEntity> qr = service.query(context, vector, legalNames.get(name));
-            //反转qr
-            qr = (List<LegalRecordEntity>) RerankUtils.reverse(qr);
-            legalEntity.setRecords(qr);
-            //放入结果
-            result.put(name, legalEntity);
+        LogUtils.log(DocumentServiceImpl.class, "开始检索:"+ legalNames.keySet());
+        //如果没有使用并行搜索，或者只有一个检索，则直接顺序检索全部的文件
+        if(parallel == false || legalNames.size() == 1){
+            LogUtils.log(DocumentServiceImpl.class, "开始顺序检索");
+            for (String name: legalNames.keySet()) {
+                LegalService service = getLegalService(name);
+                List<LegalRecordEntity> query = service.query(context, vector, legalNames.get(name));
+                List<LegalRecordEntity> reverse = (List<LegalRecordEntity>) RerankUtils.reverse(query);
+                LegalEntity legalEntity = service.getLegalEntity();
+                legalEntity.setRecords(reverse);
+                result.put(name, legalEntity);
+            }
         }
+        else {
+            LogUtils.log(DocumentServiceImpl.class, "开始并行检索");
+            //收集线程执行结果集
+            Map<String, Future<List<LegalRecordEntity>>> futuresMap = new HashMap<>();
+            //获取需要检索的法律文件的名称
+            for (String name: legalNames.keySet()) {
+                LegalService service = getLegalService(name);
+                //线程池执行并行的异步搜索
+                Future<List<LegalRecordEntity>> listFuture = searchPool.submit(() ->{
+                            //查询库表
+                            List<LegalRecordEntity> query = service.query(context, vector, legalNames.get(name));
+                            //反转结果集
+                            List<LegalRecordEntity> reverse = (List<LegalRecordEntity>) RerankUtils.reverse(query);
+                            return reverse;
+                        }
+                );
+                futuresMap.put(name, listFuture);
+            }
+            //等待所有任务完成
+            for (String name: futuresMap.keySet()){
+                Future<List<LegalRecordEntity>> future = futuresMap.get(name);
+                try {
+                    //获取异步结果
+                    List<LegalRecordEntity> qr = future.get();
+                    //获取法律实体类
+                    LegalService service = getLegalService(name);
+                    LegalEntity legalEntity = service.getLegalEntity();
+                    legalEntity.setRecords(qr);
+                    // 放入结果集
+                    result.put(name, legalEntity);
+                } catch (Exception e) {
+                    // 处理异常
+                    LogUtils.log(DocumentServiceImpl.class, "法律文件查询失败" + e.getMessage());
+                    e.printStackTrace();
+                }
+            }
+        }
+        //结束检索时间点
+        long end = System.currentTimeMillis();
+        //耗时秒
+        long time = (end - start) / 1000;
+        //毫秒
+        long millis = (end - start) - (time * 1000);
+        LogUtils.log(DocumentServiceImpl.class, "检索耗时：" + time + "秒" + millis + "毫秒");
         return result;
     }
 
