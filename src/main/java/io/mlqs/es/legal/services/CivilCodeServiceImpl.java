@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -41,7 +42,7 @@ public class CivilCodeServiceImpl implements LegalService {
         ExecutorService executor = Executors.newFixedThreadPool(2);
 
         //knn查询
-        Future<MultiGroup> knn_rerankF = executor.submit(() -> {
+        Future<List<CivilCodeRecordEntity>> knn = executor.submit(() -> {
             //knn查询
             int k = 15;
             NativeQuery query = NativeQuery.builder()
@@ -54,16 +55,11 @@ public class CivilCodeServiceImpl implements LegalService {
                     .build();
             SearchHits<CivilCodeRecordEntity> searchHits = elasticsearchTemplate.search(query, CivilCodeRecordEntity.class);
             List<CivilCodeRecordEntity> ms = searchHits.getSearchHits().stream().map(SearchHit::getContent).toList();
-            //knn重排
-            List<String> documents = new ArrayList<>();
-            for (CivilCodeRecordEntity m : ms)
-                documents.add(m.getCode() + m.getCodeName() + m.getChapter() + m.getChapterName() + m.getItem() + m.getContent());
-            List<MultiGroup> knn_rerank = rerankUtils.rerank(context, documents, 5, threshold);
-            return MultiGroup.of(ms, knn_rerank);
+            return ms;
         });
 
         //关键字查询
-        Future<MultiGroup> keyword_rerankF = executor.submit(() -> {
+        Future<List<CivilCodeRecordEntity>> keyword = executor.submit(() -> {
             NativeQuery query2 = NativeQuery.builder()
                     .withQuery(q -> q
                             .queryString(qs -> qs
@@ -75,55 +71,43 @@ public class CivilCodeServiceImpl implements LegalService {
             //取前15条
             if(ms2.size() > 10)
                 ms2 = ms2.subList(0, 10);
-            //关键字重排
-            List<String> documents2 = new ArrayList<>();
-            for (CivilCodeRecordEntity m : ms2)
-                documents2.add(m.getCode() + m.getCodeName() + m.getChapter() + m.getChapterName() + m.getItem() + m.getContent());
-            List<MultiGroup> keyword_rerank = rerankUtils.rerank(context, documents2, 5, threshold);
-            return MultiGroup.of(ms2, keyword_rerank);
+            return ms2;
         });
 
-        //获取结果
-        List<CivilCodeRecordEntity> ms = null;
-        List<CivilCodeRecordEntity> ms2 = null;
-        List<MultiGroup> knn_rerankL = null;
-        List<MultiGroup> keyword_rerankL = null;
+       //合并去重结果集
+        Set<CivilCodeRecordEntity> mixSet = new LinkedHashSet<>();
         try {
-            MultiGroup mg = knn_rerankF.get();
-            ms = mg.get(0);
-            knn_rerankL = mg.get(1);
-            MultiGroup mg2 = keyword_rerankF.get();
-            ms2 = mg2.get(0);
-            keyword_rerankL = mg2.get(1);
-        }catch (Exception e) {
+            mixSet.addAll(knn.get());
+            mixSet.addAll(keyword.get());
+        } catch (ExecutionException | InterruptedException e) {
             e.printStackTrace();
-            LogUtils.log(MarriageLawServiceImpl.class, "KNN检索或关键字检索出错");
+            LogUtils.log(CivilCodeServiceImpl.class, "KNN检索或关键字检索出错");
+            return new ArrayList<>();
         }
-        //合并rerank结果并去重，使用LinkedHashSet确保顺序
-        Set<CivilCodeRecordEntity> ms3 = new LinkedHashSet<>();
-        Set<String> documents3 = new LinkedHashSet<>();
-        for (MultiGroup mg : knn_rerankL) {
-            ms3.add(ms.get(mg.get(0)));
-            documents3.add(mg.get(2));
+        //Set转为List
+        List<CivilCodeRecordEntity> ms = new ArrayList<>(mixSet);
+        
+        //构建查询文档
+        List<String> documents = new ArrayList<>();
+        for (CivilCodeRecordEntity ms1 : ms) {
+            documents.add(ms1.getCode() + " " 
+                    + ms1.getCodeName() + " " 
+                    + ms1.getChapter() + " " 
+                    + ms1.getChapterName() + " " 
+                    + ms1.getSection() + " " 
+                    + ms1.getSectionName() + " " 
+                    + ms1.getItem() + " " + ms1.getContent());
         }
-        for (MultiGroup mg : keyword_rerankL) {
-            ms3.add(ms2.get(mg.get(0)));
-            documents3.add(mg.get(2));
+        List<MultiGroup> rerank = rerankUtils.rerank(context, documents, 10, threshold);
+        //返回集合
+        List<LegalRecordEntity> result = new ArrayList<>();
+        for (MultiGroup multiGroup : rerank) {
+            CivilCodeRecordEntity civilCodeRecordEntity = ms.get(multiGroup.get(0));
+            civilCodeRecordEntity.setVector(null);
+            result.add(civilCodeRecordEntity);
         }
-
-        //最后对得到的documents3再次rerank
-        List<MultiGroup> final_rerank = rerankUtils.rerank(context, documents3.stream().toList(), 5, threshold);
-        List<LegalRecordEntity> final_ms = new ArrayList<>();
-        List<CivilCodeRecordEntity> ms4 = ms3.stream().toList();
-        for (MultiGroup mg : final_rerank){
-            CivilCodeRecordEntity me = ms4.get(mg.get(0));
-            me.setVector(null);
-            final_ms.add(me);
-        }
-
         executor.shutdown();
-
-        return final_ms;
+        return result;
     }
 
     @Override

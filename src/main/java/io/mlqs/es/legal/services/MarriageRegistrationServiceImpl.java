@@ -44,7 +44,7 @@ public class MarriageRegistrationServiceImpl implements LegalService{
         //创建两个子线程，分别完成关键字查询和knn查询
         ExecutorService executor = Executors.newFixedThreadPool(2);
 
-        Future<MultiGroup> knn_rerankF = executor.submit(() -> {
+        Future<List<MarriageRegistrationRecordEntity>> knn = executor.submit(() -> {
             //knn查询
             int k = 15;
             NativeQuery query = NativeQuery.builder()
@@ -57,16 +57,10 @@ public class MarriageRegistrationServiceImpl implements LegalService{
                     .build();
             SearchHits<MarriageRegistrationRecordEntity> searchHits = elasticsearchTemplate.search(query, MarriageRegistrationRecordEntity.class);
             List<MarriageRegistrationRecordEntity> ms = searchHits.getSearchHits().stream().map(SearchHit::getContent).toList();
-            //knn重排
-            List<String> documents = new ArrayList<>();
-            for (MarriageRegistrationRecordEntity m : ms)
-                documents.add(m.getChapter() + m.getChapterName() + m.getItem() + m.getContent());
-            List<MultiGroup> knn_rerank = rerankUtils.rerank(context, documents, 5, threshold);
-            MultiGroup mg = MultiGroup.of(ms, knn_rerank);
-            return mg;
+            return ms;
         });
 
-        Future<MultiGroup> keyword_rerankF = executor.submit(() -> {
+        Future<List<MarriageRegistrationRecordEntity>> keyword = executor.submit(() -> {
             //关键字查询
             NativeQuery query2 = NativeQuery.builder()
                     .withQuery(q -> q
@@ -78,55 +72,31 @@ public class MarriageRegistrationServiceImpl implements LegalService{
             List<MarriageRegistrationRecordEntity> ms2 = searchHits2.getSearchHits().stream().map(SearchHit::getContent).toList();
             if (ms2.size() > 10)
                 ms2 = ms2.subList(0, 10);
-            //关键字重排
-            List<String> documents2 = new ArrayList<>();
-            for (MarriageRegistrationRecordEntity m : ms2)
-                documents2.add(m.getChapter() + m.getChapterName() + m.getItem() + m.getContent());
-            List<MultiGroup> keyword_rerank = rerankUtils.rerank(context, documents2, 5, threshold);
-            MultiGroup mg = MultiGroup.of(ms2, keyword_rerank);
-            return mg;
+            return ms2;
         });
 
-        //获取结果
-        List<MarriageRegistrationRecordEntity> ms = null;
-        List<MarriageRegistrationRecordEntity> ms2 = null;
-        List<MultiGroup> knn_rerankL = null;
-        List<MultiGroup> keyword_rerankL = null;
+        Set<MarriageRegistrationRecordEntity> set = new LinkedHashSet<>();
         try {
-            MultiGroup mg = knn_rerankF.get();
-            ms = mg.get(0);
-            knn_rerankL = mg.get(1);
-            MultiGroup mg2 = keyword_rerankF.get();
-            ms2 = mg2.get(0);
-            keyword_rerankL = mg2.get(1);
-        }catch (Exception e) {
+            set.addAll(knn.get());
+            set.addAll(keyword.get());
+        } catch (Exception e) {
             e.printStackTrace();
-            LogUtils.log(MarriageLawServiceImpl.class, "KNN检索或关键字检索出错");
+            LogUtils.log(MarriageRegistrationServiceImpl.class, "KNN检索或关键字检索出错");
+            return new ArrayList<>();
         }
-        //合并rerank结果并去重，使用LinkedHashSet确保顺序
-        Set<MarriageRegistrationRecordEntity> ms3 = new LinkedHashSet<>();
-        Set<String> documents3 = new LinkedHashSet<>();
-        for (MultiGroup mg : knn_rerankL) {
-            ms3.add(ms.get(mg.get(0)));
-            documents3.add(mg.get(2));
+        List<MarriageRegistrationRecordEntity> ms3 = set.stream().toList();
+        List<String> documents = new ArrayList<>();
+        for (MarriageRegistrationRecordEntity ms1 : ms3) {
+            documents.add(ms1.getChapter() + " " + ms1.getChapterName() + " " + ms1.getItem() + " " + ms1.getContent());
         }
-        for (MultiGroup mg : keyword_rerankL) {
-            ms3.add(ms2.get(mg.get(0)));
-            documents3.add(mg.get(2));
-        }
-
-        //最后对得到的documents3再次rerank
-        List<MultiGroup> final_rerank = rerankUtils.rerank(context, documents3.stream().toList(), 5, threshold);
+        List<MultiGroup> rerank = rerankUtils.rerank(context, documents, 5, threshold);
         List<LegalRecordEntity> final_ms = new ArrayList<>();
-        List<MarriageRegistrationRecordEntity> ms4 = ms3.stream().toList();
-        for (MultiGroup mg : final_rerank) {
-            MarriageRegistrationRecordEntity me = ms4.get(mg.get(0));
-            me.setVector(null);
-            final_ms.add(me);
+        for (MultiGroup mg : rerank) {
+            MarriageRegistrationRecordEntity marriageRegistrationRecordEntity = ms3.get(mg.get(0));
+            marriageRegistrationRecordEntity.setVector( null);
+            final_ms.add(marriageRegistrationRecordEntity);
         }
-
         executor.shutdown();
-
         return final_ms;
     }
 

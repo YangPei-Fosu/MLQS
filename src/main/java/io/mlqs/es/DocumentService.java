@@ -12,7 +12,7 @@ public interface DocumentService {
     /**
      * 混合检索检索
      * @param context 检索内容
-     * @param legalName 需要使用到的法条名称与使用的关联度阈值
+     * @param legalName 需要使用到的法条名称与使用的关联度阈值，特别的，如果指定法律名为CASE_ENTITY，则返回案件库中高于阈值的法律案例
      * @return 检索结果
      */
     DocumentSearchResultEntity hybridSearch(String context, Map<String, Double> legalName);

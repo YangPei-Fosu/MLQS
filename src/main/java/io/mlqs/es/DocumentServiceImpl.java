@@ -1,4 +1,6 @@
 package io.mlqs.es;
+import io.mlqs.es.cases.CaseService;
+import io.mlqs.es.cases.db.CaseEntity;
 import io.mlqs.es.entity.DocumentSearchResultEntity;
 import io.mlqs.es.legal.db.LegalRecordEntity;
 import io.mlqs.es.legal.entity.LegalEntity;
@@ -12,7 +14,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -85,6 +86,13 @@ public class DocumentServiceImpl implements DocumentService{
     }
 
     /**
+     * 获取案件库中高于阈值的法律案例
+     */
+    @Autowired
+    private CaseService caseService;
+
+
+    /**
      * 获取法律对应的服务类
      * @param name
      * @return 服务类
@@ -114,16 +122,34 @@ public class DocumentServiceImpl implements DocumentService{
         if(parallel == false || legalNames.size() == 1){
             LogUtils.log(DocumentServiceImpl.class, "开始顺序检索");
             for (String name: legalNames.keySet()) {
-                LegalService service = getLegalService(name);
-                List<LegalRecordEntity> query = service.query(context, vector, legalNames.get(name));
-                List<LegalRecordEntity> reverse = (List<LegalRecordEntity>) RerankUtils.reverse(query);
-                LegalEntity legalEntity = service.getLegalEntity();
-                legalEntity.setRecords(reverse);
-                result.put(name, legalEntity);
+                if(name != "CASE_ENTITY"){
+                    LegalService service = getLegalService(name);
+                    List<LegalRecordEntity> query = service.query(context, vector, legalNames.get(name));
+                    List<LegalRecordEntity> reverse = (List<LegalRecordEntity>) RerankUtils.reverse(query);
+                    LegalEntity legalEntity = service.getLegalEntity();
+                    legalEntity.setRecords(reverse);
+                    result.put(name, legalEntity);
+                }
+                else{
+                    List<CaseEntity> query = caseService.query(context,vector,legalNames.get("CASE_ENTITY"));
+                    result.put(query);
+                }
             }
         }
         else {
             LogUtils.log(DocumentServiceImpl.class, "开始并行检索");
+            //处理案件检索请求
+            Future<List<CaseEntity>> caseFuture = null;
+            if(legalNames.containsKey("CASE_ENTITY")) {
+                //移除案件检索请求避免对后续检索请求造成干扰
+                legalNames.remove("CASE_ENTITY");
+                Double threshold = legalNames.get("CASE_ENTITY");
+                if (threshold == null || threshold == 0)
+                    threshold = 0.5;
+                Double finalThreshold = threshold;
+                caseFuture = searchPool.submit(() -> caseService.query(context, vector, finalThreshold));
+            }
+
             //收集线程执行结果集
             Map<String, Future<List<LegalRecordEntity>>> futuresMap = new HashMap<>();
             //获取需要检索的法律文件的名称
@@ -140,6 +166,19 @@ public class DocumentServiceImpl implements DocumentService{
                 );
                 futuresMap.put(name, listFuture);
             }
+
+            //处理案件
+            try{
+                if(caseFuture != null){
+                    List<CaseEntity> query = caseFuture.get();
+                    //案件放入结果集
+                    result.put(query);
+                }
+            }catch (Exception e){
+                LogUtils.log(DocumentServiceImpl.class, "案件查询失败" + e.getMessage());
+                e.printStackTrace();
+            }
+
             //等待所有任务完成
             for (String name: futuresMap.keySet()){
                 Future<List<LegalRecordEntity>> future = futuresMap.get(name);

@@ -1,6 +1,7 @@
 package io.mlqs.es.entity;
 
 import com.google.gson.Gson;
+import io.mlqs.es.cases.db.CaseEntity;
 import io.mlqs.es.legal.entity.LegalEntity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -29,8 +30,13 @@ public class DocumentSearchResultEntity {
      */
     private List<String> docNames;
 
+    /**
+     * 可能有关的案件
+     */
+    List<CaseEntity> caseList;
+
     public static DocumentSearchResultEntity build(){
-        return new DocumentSearchResultEntity(new HashMap<>(), new ArrayList<>());
+        return new DocumentSearchResultEntity(new HashMap<>(), new ArrayList<>(), new ArrayList<>());
     }
 
     /**
@@ -42,6 +48,16 @@ public class DocumentSearchResultEntity {
     public DocumentSearchResultEntity put(String key, LegalEntity value){
         this.content.put(key, value);
         this.docNames.add(key);
+        return this;
+    }
+
+    public DocumentSearchResultEntity put(CaseEntity caseEntity){
+        this.caseList.add(caseEntity);
+        return this;
+    }
+
+    public DocumentSearchResultEntity put(List<CaseEntity> caseEntities){
+        this.caseList.addAll(caseEntities);
         return this;
     }
 
