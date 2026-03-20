@@ -87,5 +87,5 @@ Release 0.1.20 发行版 2025-12-26
 
 ## UML类图
 
-https://www.processon.com/v/6909b12d9586bb564a4990ab
+https://www.processon.com/v/658ec3978038833b3e0e648c
 ![image-20251106162048407](MQLS.jpg)
