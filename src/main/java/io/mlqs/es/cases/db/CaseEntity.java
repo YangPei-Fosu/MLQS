@@ -15,11 +15,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-
-@NoArgsConstructor
-@Data
-@Document(indexName = "bas_case", createIndex = true)
-public class CaseEntity {
 /*
 文档内容: {title=陈鹏与庾海莹婚姻家庭纠纷执行裁定书
 court=陕西省合阳县人民法院
@@ -52,6 +47,11 @@ file_name=321e184f551b483d88c5ac9c0117ee5d.txt
 file_size=6555
 index_time=2025-12-25T21:06:26.958272}}
  */
+
+@NoArgsConstructor
+@Data
+@Document(indexName = "bas_case", createIndex = true)
+public class CaseEntity {
     @Field(type = FieldType.Text, analyzer = "ik_max_word", searchAnalyzer = "ik_max_word")
     private String title;
     @Field(type = FieldType.Text, analyzer = "ik_max_word", searchAnalyzer = "ik_max_word")
